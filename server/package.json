@@ -1,0 +1,36 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "SMIS API Server",
+  "main": "index.js",
+  "scripts": {
+    "startDev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shykull/SMIS.git"
+  },
+  "keywords": [
+    "SMO",
+    "SM"
+  ],
+  "author": "STARC LLP",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shykull/SMIS/issues"
+  },
+  "homepage": "https://github.com/shykull/SMIS#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.3",
+    "nodemon": "^3.1.7",
+    "sequelize": "^6.37.4",
+    "sequelize-cli": "^6.6.2"
+  }
+}
