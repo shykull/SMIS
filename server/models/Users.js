@@ -25,34 +25,15 @@ module.exports = (sequelize,DataTypes) => {
             type: DataTypes.STRING,
             allownull:true,
         },
-        address1: {
+        address: {
             type: DataTypes.STRING,
             allownull:true,
         },
-        address2: {
+        profilePicture: { // New field for profile picture
             type: DataTypes.STRING,
-            allownull:true,
+            allowNull: true,
         },
-        city: {
-            type: DataTypes.STRING,
-            allownull:true,
-            default: "Kuching"
-        },
-        state: {
-            type: DataTypes.STRING,
-            allownull:true,
-            default: "Sarawak"
-        },
-        postcode: {
-            type: DataTypes.STRING,
-            allownull:true,
-            default: "93000"
-        },
-        country: {
-            type: DataTypes.STRING,
-            allownull:true,
-            default: "Malaysia"
-        }
+        
     });
 
     return Users;
