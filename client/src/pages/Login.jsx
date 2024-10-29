@@ -25,11 +25,11 @@ function Login() {
     const onSubmit = (data) => {
         axios.post("http://localhost:3001/api/user/login", data, { withCredentials: true })  // Enable sending cookies
             .then((response) => {
-                setAuth({ status: true, user: response.data.username, id: response.data.id, loading: false});
+                setAuth({ status: true, user: response.data.user.username, id: response.data.user.id, permit: response.data.user.Permission, loading: false});
                 navigate("/"); // Redirect on success
             })
             .catch((error) => {
-                setAuth({ status: false, user: null, id:0, loading: false });
+                setAuth({ status: false, user: null, id:0, permit: [], loading: false });
                 
                 // Improved error handling: Checking for both response data and fallback to a message
                 const errorMessage = error.response && error.response.data && error.response.data.error

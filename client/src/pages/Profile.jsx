@@ -85,7 +85,7 @@ function Profile() {
 
     return (
       <div className="container mt-3">
-        {console.log(userProfile)}
+
         <h2 className="text-center mb-4">{userProfile.username}</h2>
       
       <div className="text-center mb-4">

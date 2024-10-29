@@ -36,6 +36,21 @@ module.exports = (sequelize,DataTypes) => {
         
     });
 
+    Users.associate = (models) => {
+        Users.hasOne(models.Permissions,{
+            onDelete: "cascade",
+        });
+      };
+
+      Users.afterCreate(async (user, options) => {
+
+        await sequelize.models.Permissions.create({
+          UserId: user.id,
+        });
+      });
+
+    
+
     return Users;
 
 }

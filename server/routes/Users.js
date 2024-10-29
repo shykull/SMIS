@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Users } = require("../models");
+const { Users, Permissions } = require("../models");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await Users.findOne({ where: { username: username } });
+        const user = await Users.findOne({ where: { username: username }, include: [Permissions] });
 
         if (!user) {
             return res.status(404).json({ error: "User Doesn't Exist" });
@@ -73,7 +73,7 @@ router.post("/login", async (req, res) => {
                 });
 
                 // Send back a success message with the user's info
-                return res.json({ message: "Login Success", username: user.username, id: user.id });
+                return res.json({ message: "Login Success", user });
             })
             .catch((err) => {
                 // Handle unexpected bcrypt errors
@@ -101,10 +101,12 @@ router.get('/status', verifyToken, async (req, res) => {
     try {
         const user = await Users.findOne({
             where: { id: req.user.id },
-            attributes: { exclude: ['password'] } // Exclude sensitive fields
+            attributes: { exclude: ['password'] }, // Exclude sensitive fields
+            include: [Permissions]
         });
         if (user) {
             res.json({ loggedIn: true, user });
+
         } else {
             res.json({ loggedIn: false });
         }

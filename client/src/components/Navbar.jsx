@@ -19,9 +19,9 @@ function Navbar() {
         // Clear the JWT token cookie by setting its expiry date to the past
         document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         
-        setAuth({ status: false, user: null, id:0, loading: false });
+        setAuth({ status: false, user: null, id:0, permit: [], loading: false });
         // Redirect to login page
-        navigate('/login');
+        navigate('/');
       })
       .catch(error => {
         console.error('Logout failed:', error);
@@ -40,6 +40,15 @@ function Navbar() {
             <li className="nav-item">
               <Link className="nav-link" aria-current="page" to="/">Home</Link>
             </li>
+
+            {auth.permit.sys_admin ? (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/sysadmin">Admin Dashboard</Link>
+                </li>
+              </>
+
+            ) : <></> }
         
             {!auth.status ? (
               <>
