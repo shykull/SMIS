@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Registration from "./pages/Registration";
 import PageNotFound from "./pages/PageNotFound";
 import {AuthProvider } from './helpers/AuthContext'
+import Dashboard from './pages/Dashboard';
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/registration" element={<Registration />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/dashboard/*" element={<Dashboard />} />
               <Route path="*" element={<PageNotFound />} />
             </Routes>
           </div>

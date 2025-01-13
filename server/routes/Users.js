@@ -24,6 +24,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+router.get('/all', verifyToken, async (req, res) => {
+try {
+    const users = await Users.findAll({attributes: { exclude: ['password'] }, include: [Permissions] });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+
+
+});
 
 router.post("/", async (req, res) => {
     try {

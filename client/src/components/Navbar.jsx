@@ -44,7 +44,7 @@ function Navbar() {
             {auth.permit.sys_admin ? (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/sysadmin">Admin Dashboard</Link>
+                  <Link className="nav-link" to="/dashboard">Admin Dashboard</Link>
                 </li>
               </>
 
