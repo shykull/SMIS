@@ -8,18 +8,15 @@ function Sidebar() {
     <>
       {/* Button to toggle off-canvas */}
       
-   
-      <button 
-        className="carousel-control-prev" 
-        type="button" 
-        data-bs-toggle="offcanvas" 
-        data-bs-target="#offcanvasSidebar" 
-        aria-controls="offcanvasSidebar"
-      >
-      </button> 
       <div className='mt-3 col-2'>
-      <FontAwesomeIcon icon={faBars} size="2xl" style={{ marginRight: '5px' }} /> <b>Show Panel</b> 
-        
+        <button 
+          className="btn" 
+          type="button" 
+          data-bs-toggle="offcanvas" 
+          data-bs-target="#offcanvasSidebar" 
+          aria-controls="offcanvasSidebar"
+        ><FontAwesomeIcon icon={faBars} size="2xl" style={{ marginRight: '5px' }} /> <b>Show Panel</b> 
+        </button>   
       </div>
 
       {/* Off-canvas sidebar */}

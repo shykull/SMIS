@@ -1,4 +1,4 @@
-import React, { useState,useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../helpers/AuthContext';
 import ProfilePicture from '../components/ProfilePicture';
@@ -9,6 +9,7 @@ function Profile() {
     const navigate = useNavigate();
     const [userProfile, setUserProfile] = useState({});
     const [alertMessage, setAlertMessage] = useState('');
+    const [password, setPassword] = useState(''); // New state for password
   
     useEffect(() => {
       if (auth.loading) {
@@ -38,7 +39,11 @@ function Profile() {
     const handleSave = async () => {
         try {
           // Send updated profile data to backend API
-          const response = await axios.put('http://localhost:3001/api/user/profile', userProfile, { withCredentials: true });
+          const updatedProfile = { ...userProfile };
+          if (password) {
+            updatedProfile.password = password; // Include password if provided
+          }
+          const response = await axios.put('http://localhost:3001/api/user/profile', updatedProfile, { withCredentials: true });
           
           // Optionally update local userProfile with the response
           setUserProfile(response.data);
@@ -57,10 +62,14 @@ function Profile() {
       
     const handleChange = (e) => {
             const { name, value } = e.target;
-            setUserProfile((prevProfile) => ({
-            ...prevProfile,
-            [name]: value
-            }));
+            if (name === 'password') {
+              setPassword(value); // Handle password change
+            } else {
+              setUserProfile((prevProfile) => ({
+                ...prevProfile,
+                [name]: value
+              }));
+            }
         };
   
     const handleFileChange = async (file) => {
@@ -159,7 +168,16 @@ function Profile() {
             />
         </div>
 
-
+        <div className="col-md-12">
+          <label className="form-label">Change Password</label>
+          <input
+            type="password"
+            name="password"
+            value={password}
+            onChange={handleChange}
+            className="form-control"
+          />
+        </div>
 
         <div className="d-grid gap-2 col-6 mx-auto">
         
@@ -174,4 +192,4 @@ function Profile() {
     );
 }
 
-export default Profile
+export default Profile;

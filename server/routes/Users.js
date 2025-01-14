@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
-const {verifyToken}=require('../middleware/AuthMiddleware');
+const { verifyToken } = require('../middleware/AuthMiddleware');
 
 const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
@@ -15,24 +15,22 @@ router.use(cookieParser()); // Enable cookie parsing
 // Set up multer for file storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, '../client/public/profile'); // Folder where profile pictures are saved
+        cb(null, '../client/public/profile'); // Folder where profile pictures are saved
     },
     filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, `${Date.now()}-${file.originalname}`);
     },
-  });
+});
 
 const upload = multer({ storage });
 
 router.get('/all', verifyToken, async (req, res) => {
-try {
-    const users = await Users.findAll({attributes: { exclude: ['password'] }, include: [Permissions] });
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching users' });
-  }
-
-
+    try {
+        const users = await Users.findAll({ attributes: { exclude: ['password'] }, include: [Permissions] });
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching users' });
+    }
 });
 
 router.post("/", async (req, res) => {
@@ -40,7 +38,7 @@ router.post("/", async (req, res) => {
         const { username, password } = req.body;
         // Check if the username already exists
         const userExists = await Users.findOne({ where: { username: username } });
-        
+
         if (userExists) {
             return res.status(400).json({ error: "Username already taken" });
         }
@@ -97,7 +95,6 @@ router.post("/login", async (req, res) => {
     }
 });
 
-
 router.post("/logout", (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
@@ -128,7 +125,7 @@ router.get('/status', verifyToken, async (req, res) => {
 
 // Route to update user profile
 router.put('/profile', verifyToken, upload.single('profilePicture'), async (req, res) => {
-    const { id, email, firstname, lastname, contact, address } = req.body;
+    const { id, email, firstname, lastname, contact, address, password } = req.body;
     const profilePicture = req.file ? `/profile/${req.file.filename}` : undefined; // Use undefined instead of null
 
     // Construct update data conditionally
@@ -136,29 +133,92 @@ router.put('/profile', verifyToken, upload.single('profilePicture'), async (req,
 
     // Add profilePicture to updateData only if a new file was uploaded
     if (profilePicture !== undefined) {
-    updateData.profilePicture = profilePicture;
+        updateData.profilePicture = profilePicture;
+    }
+
+    // Hash the new password if provided
+    if (password) {
+        const hash = await bcrypt.hash(password, 10);
+        updateData.password = hash;
     }
 
     try {
-    // Update user profile in the database
-    const updated = await Users.update(updateData, { where: { id } });
-  
-      if (updated === 0) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+        // Update user profile in the database
+        const updated = await Users.update(updateData, { where: { id } });
 
-      const user = await Users.findOne({
-        where: { id: id },
-        attributes: { exclude: ['password'] } // Exclude sensitive fields
-      });
-  
-      res.json({user });
-      
+        if (updated === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const user = await Users.findOne({
+            where: { id: id },
+            attributes: { exclude: ['password'] } // Exclude sensitive fields
+        });
+
+        res.json({ user });
+
     } catch (error) {
-      console.error('Error updating profile:', error);
-      res.status(500).json({ message: 'Server error while updating profile' });
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: 'Server error while updating profile' });
     }
-  });
-  
+});
 
-module.exports =  router;
+// Route to update user permissions and password
+router.put('/updateUser', verifyToken, async (req, res) => {
+    const { id, username, password, permissions } = req.body;
+
+    // Construct update data conditionally
+    const updateData = { username };
+
+    // Hash the new password if provided
+    if (password) {
+        const hash = await bcrypt.hash(password, 10);
+        updateData.password = hash;
+    }
+
+    try {
+        // Update user profile in the database
+        const updated = await Users.update(updateData, { where: { id } });
+
+        if (updated === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update user permissions in the database
+        await Permissions.update(permissions, { where: { UserId: id } });
+
+        const user = await Users.findOne({
+            where: { id: id },
+            attributes: { exclude: ['password'] }, // Exclude sensitive fields
+            include: [Permissions]
+        });
+
+        res.json({ user });
+
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Server error while updating user' });
+    }
+});
+
+// Route to delete a user
+router.delete('/:id', verifyToken, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Delete user from the database
+        const deleted = await Users.destroy({ where: { id } });
+
+        if (deleted === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'User deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Server error while deleting user' });
+    }
+});
+
+module.exports = router;

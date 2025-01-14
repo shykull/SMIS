@@ -45,6 +45,7 @@ function UserManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
+      id: userForm.id,
       username: userForm.username,
       password: userForm.password,
       permissions: {
@@ -62,9 +63,9 @@ function UserManagement() {
     };
 
     if (userForm.id) {
-      await axios.put(`http://localhost:3001/api/users/${userForm.id}`, payload);
+      await axios.put(`http://localhost:3001/api/user/updateUser`, payload, { withCredentials: true });
     } else {
-      await axios.post('http://localhost:3001/api/users', payload);
+      await axios.post('http://localhost:3001/api/user', payload, { withCredentials: true });
     }
     fetchUsers();
     setUserForm({ id: null, username: '', password: '', permissions: {} }); // Reset form
@@ -91,7 +92,7 @@ function UserManagement() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:3001/api/users/${id}`);
+    await axios.delete(`http://localhost:3001/api/user/${id}`, { withCredentials: true });
     fetchUsers();
   };
 
