@@ -1,56 +1,57 @@
-module.exports = (sequelize,DataTypes) => {
-
+module.exports = (sequelize, DataTypes) => {
     const Users = sequelize.define("Users", {
         username: {
             type: DataTypes.STRING,
-            allownull:false,
+            allowNull: false,
         },
         password: {
             type: DataTypes.STRING,
-            allownull:false,
+            allowNull: false,
         },
         email: {
             type: DataTypes.STRING,
-            allownull:true,
+            allowNull: true,
         },
         firstname: {
             type: DataTypes.STRING,
-            allownull:true,
+            allowNull: true,
         },
         lastname: {
             type: DataTypes.STRING,
-            allownull:true,
+            allowNull: true,
         },
         contact: {
             type: DataTypes.STRING,
-            allownull:true,
+            allowNull: true,
         },
         address: {
             type: DataTypes.STRING,
-            allownull:true,
+            allowNull: true,
         },
-        profilePicture: { // New field for profile picture
+        profilePicture: {
             type: DataTypes.STRING,
             allowNull: true,
         },
-        
     });
 
     Users.associate = (models) => {
-        Users.hasOne(models.Permissions,{
+        Users.hasOne(models.Permissions, {
             onDelete: "cascade",
         });
-      };
-
-      Users.afterCreate(async (user, options) => {
-
-        await sequelize.models.Permissions.create({
-          UserId: user.id,
+        Users.belongsToMany(models.Building, {
+            through: 'UserBuildings',
+            as: 'Buildings',
+            foreignKey: 'UserId',
+            otherKey: 'BuildingId',
+            onDelete: "SET NULL",
         });
-      });
+    };
 
-    
+    Users.afterCreate(async (user, options) => {
+        await sequelize.models.Permissions.create({
+            UserId: user.id,
+        });
+    });
 
     return Users;
-
-}
+};
