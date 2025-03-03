@@ -9,6 +9,9 @@ import "datatables.net-bs5"; // Import Bootstrap integration for DataTables
 function UserManagement() {
   const [users, setUsers] = useState([]);
   const [userForm, setUserForm] = useState({ id: null, username: '', password: '', permissions: {} });
+  // State to handle alert visibility, message, and type
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState(''); // New state for alert type
 
   useEffect(() => {
     fetchUsers();
@@ -62,13 +65,22 @@ function UserManagement() {
       },
     };
 
-    if (userForm.id) {
-      await axios.put(`http://localhost:3001/api/user/updateUser`, payload, { withCredentials: true });
-    } else {
-      await axios.post('http://localhost:3001/api/user', payload, { withCredentials: true });
+    try {
+      if (userForm.id) {
+        await axios.put(`http://localhost:3001/api/user/updateUser`, payload, { withCredentials: true });
+        setAlertMessage('User updated successfully');
+        setAlertType('success'); // Set alert type to success
+      } else {
+        await axios.post('http://localhost:3001/api/user', payload, { withCredentials: true });
+        setAlertMessage('User added successfully');
+        setAlertType('success'); // Set alert type to success
+      }
+      fetchUsers();
+      setUserForm({ id: null, username: '', password: '', permissions: {} }); // Reset form
+    } catch (error) {
+      setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
+      setAlertType('danger'); // Set alert type to danger
     }
-    fetchUsers();
-    setUserForm({ id: null, username: '', password: '', permissions: {} }); // Reset form
   };
 
   const handleEdit = (user) => {
@@ -91,14 +103,33 @@ function UserManagement() {
     });
   };
 
-  const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:3001/api/user/${id}`, { withCredentials: true });
-    fetchUsers();
+  const handleDelete = async (id, username) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the user "${username}"?`);
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:3001/api/user/${id}`, { withCredentials: true });
+      setAlertMessage('User deleted successfully');
+      setAlertType('success'); // Set alert type to success
+      fetchUsers();
+    } catch (error) {
+      setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
+      setAlertType('danger'); // Set alert type to danger
+    }
   };
 
   return (
     <div className="container mt-4">
       <h1>User Management</h1>
+      {/* Bootstrap dismissible alert */}
+      {alertMessage && (
+          <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
+            {alertMessage}
+            <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
+          </div>
+      )}
       <form onSubmit={handleSubmit} className="mb-4">
         <input
           type="hidden"
@@ -124,7 +155,6 @@ function UserManagement() {
             placeholder="Reset Password"
             value={userForm.password}
             onChange={handleInputChange}
-            required
           />
         </div>
         <div className="row mb-3">
@@ -170,7 +200,7 @@ function UserManagement() {
               <td>{user.lastname}</td>
               <td>
                 <button onClick={() => handleEdit(user)} className="btn btn-warning btn-sm me-1">Edit</button>
-                <button onClick={() => handleDelete(user.id)} className="btn btn-danger btn-sm">Delete</button>
+                <button onClick={() => handleDelete(user.id, user.username)} className="btn btn-danger btn-sm">Delete</button>
               </td>
             </tr>
           ))}
