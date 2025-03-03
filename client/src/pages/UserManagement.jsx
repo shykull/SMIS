@@ -5,10 +5,12 @@ import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'; // Import Bootstr
 import $ from "jquery";
 import "datatables.net";
 import "datatables.net-bs5"; // Import Bootstrap integration for DataTables
+import Papa from 'papaparse'; // Import PapaParse for CSV parsing
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
   const [userForm, setUserForm] = useState({ id: null, username: '', password: '', permissions: {} });
+  const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
   // State to handle alert visibility, message, and type
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState(''); // New state for alert type
@@ -25,9 +27,9 @@ function UserManagement() {
   }, [users]);
 
   const fetchUsers = async () => {
-    const response = await axios.get('http://localhost:3001/api/user/all',{withCredentials: true,}); // Adjust your API endpoint
+    const response = await axios.get('http://localhost:3001/api/user/all', { withCredentials: true }); // Adjust your API endpoint
     setUsers(response.data);
-    console.log(response.data)
+    console.log(response.data);
   };
 
   const handleInputChange = (e) => {
@@ -84,11 +86,11 @@ function UserManagement() {
   };
 
   const handleEdit = (user) => {
-    setUserForm({ 
-      id: user.id, 
-      username: user.username, 
+    setUserForm({
+      id: user.id,
+      username: user.username,
       password: '', // Keep password empty for security reasons
-      permissions: { 
+      permissions: {
         visitor: user.Permission.visitor,
         owner: user.Permission.owner,
         tenant: user.Permission.tenant,
@@ -120,15 +122,43 @@ function UserManagement() {
     }
   };
 
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  const handleFileUpload = () => {
+    if (selectedFile) {
+      Papa.parse(selectedFile, {
+        header: true,
+        complete: async (results) => {
+          const users = results.data;
+          try {
+            const response = await axios.post('http://localhost:3001/api/user/upload', { users }, { withCredentials: true });
+            setAlertMessage('Users uploaded successfully');
+            setAlertType('success'); // Set alert type to success
+            fetchUsers();
+          } catch (error) {
+            setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
+            setAlertType('danger'); // Set alert type to danger
+          }
+        },
+        error: (error) => {
+          setAlertMessage('Error parsing CSV file: ' + error.message);
+          setAlertType('danger'); // Set alert type to danger
+        }
+      });
+    }
+  };
+
   return (
     <div className="container mt-4">
       <h1>User Management</h1>
       {/* Bootstrap dismissible alert */}
       {alertMessage && (
-          <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
-            {alertMessage}
-            <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
-          </div>
+        <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
+          {alertMessage}
+          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
+        </div>
       )}
       <form onSubmit={handleSubmit} className="mb-4">
         <input
@@ -158,7 +188,7 @@ function UserManagement() {
           />
         </div>
         <div className="row mb-3">
-          <label className="form-label">Permissions</label>
+          <h4>Permissions</h4>
           {Object.keys(userForm.permissions).length > 0 && (
             <>
               {Object.keys(userForm.permissions).map((permission) => (
@@ -179,6 +209,7 @@ function UserManagement() {
           {userForm.id ? 'Update User' : 'Add User'}
         </button>
       </form>
+      
       <table id="userTable" className="table table-striped table-bordered">
         <thead>
           <tr>
@@ -206,7 +237,13 @@ function UserManagement() {
           ))}
         </tbody>
       </table>
+      <h4 className="mt-4">Bulk Upload User CSV</h4>
+      <div className="input-group mb-4">
+        <input type="file" className="form-control" accept=".csv" onChange={handleFileChange} />
+        <button onClick={handleFileUpload} className="btn btn-success">Upload</button>
+      </div>    
     </div>
+    
   );
 }
 

@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const { verifyToken } = require('../middleware/AuthMiddleware');
+const { Op } = require('sequelize');
 
 const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
@@ -218,6 +219,25 @@ router.delete('/:id', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Error deleting user:', error);
         res.status(500).json({ message: 'Server error while deleting user' });
+    }
+});
+
+// Route to handle CSV upload and create users
+router.post('/upload', verifyToken, async (req, res) => {
+    const { users } = req.body;
+
+    try {
+        for (const user of users) {
+            const existingUser = await Users.findOne({ where:  { username: user.username }} );
+            if (!existingUser) {
+                const hash = await bcrypt.hash(user.password, 10);
+                await Users.create({ ...user, password: hash });
+            }
+        }
+        res.json({ message: 'Users uploaded successfully' });
+    } catch (error) {
+        console.error('Error uploading users:', error);
+        res.status(500).json({ message: 'Server error while uploading users' });
     }
 });
 
