@@ -16,7 +16,8 @@ const db = require("./models");
 // Routers
 const usersRouter = require('./routes/Users');
 app.use("/api/user", usersRouter);
-
+const buildingRouter = require('./routes/Buildings');
+app.use("/api/build", buildingRouter);
 
 
 db.sequelize.sync()
