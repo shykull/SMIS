@@ -25,6 +25,7 @@ function Home() {
 
   return (
     <div className="container mt-3">
+      <h1> Home Page </h1>      
 
     </div>
   );
