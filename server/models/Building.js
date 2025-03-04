@@ -20,23 +20,13 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        OwnerName: {
-            type: DataTypes.STRING,
-            allowNull: true,
-        },
-        TenantName: {
-            type: DataTypes.STRING,
-            allowNull: true,
-        },
     });
 
     Building.associate = (models) => {
         Building.belongsToMany(models.Users, {
             through: 'UserBuildings',
-            as: 'Users',
             foreignKey: 'BuildingId',
-            otherKey: 'UserId',
-            onDelete: "SET NULL",
+            onDelete: "cascade",
         });
     };
 

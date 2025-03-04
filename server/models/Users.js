@@ -40,10 +40,8 @@ module.exports = (sequelize, DataTypes) => {
         });
         Users.belongsToMany(models.Building, {
             through: 'UserBuildings',
-            as: 'Buildings',
             foreignKey: 'UserId',
-            otherKey: 'BuildingId',
-            onDelete: "SET NULL",
+            onDelete: "cascade",
         });
     };
 
