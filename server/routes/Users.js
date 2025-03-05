@@ -164,12 +164,12 @@ router.put('/profile', verifyToken, upload.single('profilePicture'), async (req,
     }
 });
 
-// Route to update user permissions and password
+// Route to update user permissions and profile information
 router.put('/updateUser', verifyToken, async (req, res) => {
-    const { id, username, password, permissions } = req.body;
+    const { id, username, email, contact, firstname, lastname, password, permissions } = req.body;
 
     // Construct update data conditionally
-    const updateData = { username };
+    const updateData = { username, email, contact, firstname, lastname };
 
     // Hash the new password if provided
     if (password) {
@@ -181,7 +181,7 @@ router.put('/updateUser', verifyToken, async (req, res) => {
         // Update user profile in the database
         const updated = await Users.update(updateData, { where: { id } });
 
-        if (updated === 0) {
+        if (updated[0] === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 

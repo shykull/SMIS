@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Building, UserBuildings } = require("../models");
+const { Building, UserBuildings, Users, Permissions } = require("../models");
 const cookieParser = require('cookie-parser');
 const { verifyToken } = require('../middleware/AuthMiddleware');
 const { Op } = require('sequelize');
@@ -9,7 +9,6 @@ const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
 
 router.use(cookieParser()); // Enable cookie parsing
-
 
 // Create a new building
 router.post('/create', verifyToken, async (req, res) => {
@@ -26,7 +25,24 @@ router.post('/create', verifyToken, async (req, res) => {
 // Get all buildings
 router.get('/all', verifyToken, async (req, res) => {
     try {
-        const buildings = await Building.findAll();
+        const buildings = await Building.findAll({
+            include: [
+                {
+                    model: Users,
+                    as: 'Users',
+                    through: {
+                        attributes: []
+                    },
+                    attributes: ['firstname', 'lastname', 'contact'],
+                    include: [
+                        {
+                            model: Permissions,
+                            attributes: ['owner', 'tenant']
+                        }
+                    ]
+                }
+            ]
+        });
         res.json(buildings);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching buildings', error });
@@ -38,7 +54,24 @@ router.get('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
 
     try {
-        const building = await Building.findByPk(id);
+        const building = await Building.findByPk(id, {
+            include: [
+                {
+                    model: Users,
+                    as: 'Users',
+                    through: {
+                        attributes: []
+                    },
+                    attributes: ['firstname', 'lastname', 'contact'],
+                    include: [
+                        {
+                            model: Permissions,
+                            attributes: ['owner', 'tenant']
+                        }
+                    ]
+                }
+            ]
+        });
         if (!building) {
             return res.status(404).json({ message: 'Building not found' });
         }
@@ -52,7 +85,6 @@ router.get('/:id', verifyToken, async (req, res) => {
 router.put('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     const { block, level, unit, area, shareUnit } = req.body;
-
 
     try {
         const building = await Building.findByPk(id);
@@ -96,6 +128,35 @@ router.post('/assoc', verifyToken, async (req, res) => {
 
     try {
         const userBuilding = await UserBuildings.create({ UserId, BuildingId });
+
+        // Query the Users database to get the user's first name and last name
+        const user = await Users.findByPk(UserId, {
+            include: [Permissions]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const fullName = `${user.firstname} ${user.lastname}`;
+
+        // Check if the user has the owner or tenant permission
+        const permissions = user.Permissions;
+        let updateField = null;
+
+        if (permissions.owner) {
+            updateField = { OwnerName: fullName };
+        } else if (permissions.tenant) {
+            updateField = { TenantName: fullName };
+        }
+
+        if (updateField) {
+            // Update the Building database with the concatenated first and last name
+            await Building.update(updateField, {
+                where: { id: BuildingId }
+            });
+        }
+
         res.json(userBuilding);
     } catch (error) {
         res.status(500).json({ message: 'Error creating user-building association', error });

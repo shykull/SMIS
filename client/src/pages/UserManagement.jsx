@@ -6,10 +6,11 @@ import $ from "jquery";
 import "datatables.net";
 import "datatables.net-bs5"; // Import Bootstrap integration for DataTables
 import Papa from 'papaparse'; // Import PapaParse for CSV parsing
+import { CSVLink } from "react-csv"; // Import CSVLink from react-csv
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
-  const [userForm, setUserForm] = useState({ id: null, username: '', password: '', permissions: {} });
+  const [userForm, setUserForm] = useState({ id: null, username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} });
   const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
   // State to handle alert visibility, message, and type
   const [alertMessage, setAlertMessage] = useState('');
@@ -52,6 +53,10 @@ function UserManagement() {
     const payload = {
       id: userForm.id,
       username: userForm.username,
+      email: userForm.email,
+      contact: userForm.contact,
+      firstname: userForm.firstname,
+      lastname: userForm.lastname,
       password: userForm.password,
       permissions: {
         visitor: userForm.permissions.visitor || false,
@@ -78,7 +83,7 @@ function UserManagement() {
         setAlertType('success'); // Set alert type to success
       }
       fetchUsers();
-      setUserForm({ id: null, username: '', password: '', permissions: {} }); // Reset form
+      setUserForm({ id: null, username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} }); // Reset form
     } catch (error) {
       setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
       setAlertType('danger'); // Set alert type to danger
@@ -89,6 +94,10 @@ function UserManagement() {
     setUserForm({
       id: user.id,
       username: user.username,
+      email: user.email,
+      contact: user.contact,
+      firstname: user.firstname,
+      lastname: user.lastname,
       password: '', // Keep password empty for security reasons
       permissions: {
         visitor: user.Permission.visitor,
@@ -150,6 +159,14 @@ function UserManagement() {
     }
   };
 
+  const csvHeaders = [
+    { label: "username", key: "username" },
+    { label: "email", key: "email" },
+    { label: "contact", key: "contact" },
+    { label: "firstname", key: "firstname" },
+    { label: "lastname", key: "lastname" },
+  ];
+
   return (
     <div className="container mt-4">
       <h1>User Management</h1>
@@ -160,13 +177,13 @@ function UserManagement() {
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
         </div>
       )}
-      <form onSubmit={handleSubmit} className="mb-4">
+      <form onSubmit={handleSubmit} className="row mb-4">
         <input
           type="hidden"
           name="id"
           value={userForm.id}
         />
-        <div className="mb-3">
+        <div className="col-12 mb-3">
           <input
             type="text"
             name="username"
@@ -177,7 +194,51 @@ function UserManagement() {
             required
           />
         </div>
-        <div className="mb-3">
+        <div className="col-6 mb-3">
+          <input
+            type="email"
+            name="email"
+            className="form-control"
+            placeholder="Email"
+            value={userForm.email}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="col-6 mb-3">
+          <input
+            type="text"
+            name="contact"
+            className="form-control"
+            placeholder="Contact"
+            value={userForm.contact}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="col-6 mb-3">
+          <input
+            type="text"
+            name="firstname"
+            className="form-control"
+            placeholder="First Name"
+            value={userForm.firstname}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="col-6 mb-3">
+          <input
+            type="text"
+            name="lastname"
+            className="form-control"
+            placeholder="Last Name"
+            value={userForm.lastname}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="col-12 mb-3">
           <input
             type="password"
             name="password"
@@ -230,20 +291,29 @@ function UserManagement() {
               <td>{user.firstname}</td>
               <td>{user.lastname}</td>
               <td>
-                <button onClick={() => handleEdit(user)} className="btn btn-warning btn-sm me-1">Edit</button>
-                <button onClick={() => handleDelete(user.id, user.username)} className="btn btn-danger btn-sm">Delete</button>
+                <button onClick={() => handleEdit(user)} className="btn btn-warning btn-sm me-1">🖊️ Edit</button>
+                <button onClick={() => handleDelete(user.id, user.username)} className="btn btn-danger btn-sm">🗑️ Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <CSVLink
+        data={users}
+        headers={csvHeaders}
+        filename={"users.csv"}
+        className="btn btn-secondary mt-3 mb-3 col-12"
+        target="_blank"
+      >
+        Download CSV
+      </CSVLink>
+      <hr />
       <h4 className="mt-4">Bulk Upload User CSV</h4>
       <div className="input-group mb-4">
         <input type="file" className="form-control" accept=".csv" onChange={handleFileChange} />
         <button onClick={handleFileUpload} className="btn btn-success">Upload</button>
       </div>    
     </div>
-    
   );
 }
 
