@@ -1,22 +1,22 @@
 module.exports = (sequelize, DataTypes) => {
     const Building = sequelize.define("Building", {
-        Name: {
+        block: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        Level: {
+        level: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        Unit: {
+        unit: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        Area: {
+        area: {
             type: DataTypes.STRING,
             allowNull: true,
         },
-        ShareUnit: {
+        shareUnit: {
             type: DataTypes.STRING,
             allowNull: false,
         },

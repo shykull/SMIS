@@ -13,10 +13,10 @@ router.use(cookieParser()); // Enable cookie parsing
 
 // Create a new building
 router.post('/create', verifyToken, async (req, res) => {
-    const { Name, Level, Unit, Area, ShareUnit } = req.body;
+    const { block, level, unit, area, shareUnit } = req.body;
 
     try {
-        const building = await Building.create({ Name, Level, Unit, Area, ShareUnit });
+        const building = await Building.create({ block, level, unit, area, shareUnit });
         res.json(building);
     } catch (error) {
         res.status(500).json({ message: 'Error creating building', error });
@@ -51,7 +51,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 // Update a building by ID
 router.put('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
-    const { Name, Level, Unit, Area, ShareUnit } = req.body;
+    const { block, level, unit, area, shareUnit } = req.body;
 
 
     try {
@@ -60,11 +60,11 @@ router.put('/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ message: 'Building not found' });
         }
 
-        building.Name = Name;
-        building.Level = Level;
-        building.Unit = Unit;
-        building.Area = Area;
-        building.ShareUnit = ShareUnit;
+        building.block = block;
+        building.level = level;
+        building.unit = unit;
+        building.area = area;
+        building.shareUnit = shareUnit;
 
         await building.save();
         res.json(building);
@@ -171,7 +171,7 @@ router.post('/upload', verifyToken, async (req, res) => {
 
     try {
         for (const build of builds) {
-            const existingBuild = await Building.findOne({ where: { [Op.and]: [{ Name: build.name }, { Level: build.level }, { Unit: build.unit }] }} );
+            const existingBuild = await Building.findOne({ where: { [Op.and]: [{ block: build.block }, { level: build.level }, { unit: build.unit }] }} );
             if (!existingBuild) {
                await Building.create({ ...build});
             }
