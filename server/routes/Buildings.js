@@ -72,6 +72,7 @@ router.get('/:id', verifyToken, async (req, res) => {
                 }
             ]
         });
+        console.log('Building:', building);
         if (!building) {
             return res.status(404).json({ message: 'Building not found' });
         }
@@ -128,35 +129,6 @@ router.post('/assoc', verifyToken, async (req, res) => {
 
     try {
         const userBuilding = await UserBuildings.create({ UserId, BuildingId });
-
-        // Query the Users database to get the user's first name and last name
-        const user = await Users.findByPk(UserId, {
-            include: [Permissions]
-        });
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const fullName = `${user.firstname} ${user.lastname}`;
-
-        // Check if the user has the owner or tenant permission
-        const permissions = user.Permissions;
-        let updateField = null;
-
-        if (permissions.owner) {
-            updateField = { OwnerName: fullName };
-        } else if (permissions.tenant) {
-            updateField = { TenantName: fullName };
-        }
-
-        if (updateField) {
-            // Update the Building database with the concatenated first and last name
-            await Building.update(updateField, {
-                where: { id: BuildingId }
-            });
-        }
-
         res.json(userBuilding);
     } catch (error) {
         res.status(500).json({ message: 'Error creating user-building association', error });
@@ -209,20 +181,20 @@ router.put('/assoc/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Delete a user-building association by ID
+// Delete all user-building associations by BuildingId
 router.delete('/assoc/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
 
     try {
-        const userBuilding = await UserBuildings.findByPk(id);
-        if (!userBuilding) {
-            return res.status(404).json({ message: 'User-building association not found' });
+        const userBuildings = await UserBuildings.findAll({ where: { BuildingId: id } });
+        if (!userBuildings.length) {
+            return res.status(404).json({ message: 'User-building associations not found' });
         }
 
-        await userBuilding.destroy();
-        res.json({ message: 'User-building association deleted successfully' });
+        await UserBuildings.destroy({ where: { BuildingId: id } });
+        res.json({ message: 'User-building associations deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting user-building association', error });
+        res.status(500).json({ message: 'Error deleting user-building associations', error });
     }
 });
 
