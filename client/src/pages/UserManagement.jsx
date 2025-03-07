@@ -10,7 +10,7 @@ import { CSVLink } from "react-csv"; // Import CSVLink from react-csv
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
-  const [userForm, setUserForm] = useState({ id: null, username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} });
+  const [userForm, setUserForm] = useState({ id: '', username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} });
   const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
   // State to handle alert visibility, message, and type
   const [alertMessage, setAlertMessage] = useState('');
@@ -30,7 +30,7 @@ function UserManagement() {
   const fetchUsers = async () => {
     const response = await axios.get('http://localhost:3001/api/user/all', { withCredentials: true }); // Adjust your API endpoint
     setUsers(response.data);
-    console.log(response.data);
+   // console.log(response.data);
   };
 
   const handleInputChange = (e) => {
@@ -83,7 +83,7 @@ function UserManagement() {
         setAlertType('success'); // Set alert type to success
       }
       fetchUsers();
-      setUserForm({ id: null, username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} }); // Reset form
+      setUserForm({ id: '', username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} }); // Reset form
     } catch (error) {
       setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
       setAlertType('danger'); // Set alert type to danger
@@ -181,7 +181,7 @@ function UserManagement() {
         <input
           type="hidden"
           name="id"
-          value={userForm.id}
+          value={userForm.id || ''}
         />
         <div className="col-12 mb-3">
           <input
@@ -189,7 +189,7 @@ function UserManagement() {
             name="username"
             className="form-control"
             placeholder="Username"
-            value={userForm.username}
+            value={userForm.username || ''}
             onChange={handleInputChange}
             required
           />
@@ -200,7 +200,7 @@ function UserManagement() {
             name="email"
             className="form-control"
             placeholder="Email"
-            value={userForm.email}
+            value={userForm.email || ''}
             onChange={handleInputChange}
             required
           />
@@ -211,7 +211,7 @@ function UserManagement() {
             name="contact"
             className="form-control"
             placeholder="Contact"
-            value={userForm.contact}
+            value={userForm.contact || ''}
             onChange={handleInputChange}
             required
           />
@@ -222,7 +222,7 @@ function UserManagement() {
             name="firstname"
             className="form-control"
             placeholder="First Name"
-            value={userForm.firstname}
+            value={userForm.firstname || ''}
             onChange={handleInputChange}
             required
           />
@@ -233,7 +233,7 @@ function UserManagement() {
             name="lastname"
             className="form-control"
             placeholder="Last Name"
-            value={userForm.lastname}
+            value={userForm.lastname || ''}
             onChange={handleInputChange}
             required
           />
@@ -244,7 +244,7 @@ function UserManagement() {
             name="password"
             className="form-control"
             placeholder="Reset Password"
-            value={userForm.password}
+            value={userForm.password || ''}
             onChange={handleInputChange}
           />
         </div>
