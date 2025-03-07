@@ -56,7 +56,7 @@ function PropertyManagement() {
     try {
       const response = await axios.get('http://localhost:3001/api/user/all', { withCredentials: true });
       setUsers(response.data);
-      console.log('Users:', response.data);
+     // console.log('Users:', response.data);
     } catch (error) {
       setAlertMessage('Error fetching users: ' + (error.response?.data?.message || error.message));
       setAlertType('danger');
@@ -136,7 +136,7 @@ function PropertyManagement() {
       try {
         await axios.delete(`http://localhost:3001/api/build/assoc/${selectedBuilding.id}`, { withCredentials: true });
       } catch (deleteError) {
-        console.error('Error deleting existing associations:', deleteError);
+        //console.error('Error deleting existing associations:', deleteError);
         // Continue regardless of the delete error
       }
   

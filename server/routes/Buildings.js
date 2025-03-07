@@ -72,7 +72,7 @@ router.get('/:id', verifyToken, async (req, res) => {
                 }
             ]
         });
-        console.log('Building:', building);
+       // console.log('Building:', building);
         if (!building) {
             return res.status(404).json({ message: 'Building not found' });
         }
