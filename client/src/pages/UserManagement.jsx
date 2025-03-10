@@ -202,7 +202,6 @@ function UserManagement() {
             placeholder="Email"
             value={userForm.email || ''}
             onChange={handleInputChange}
-            required
           />
         </div>
         <div className="col-6 mb-3">
@@ -213,7 +212,6 @@ function UserManagement() {
             placeholder="Contact"
             value={userForm.contact || ''}
             onChange={handleInputChange}
-            required
           />
         </div>
         <div className="col-6 mb-3">
@@ -224,7 +222,6 @@ function UserManagement() {
             placeholder="First Name"
             value={userForm.firstname || ''}
             onChange={handleInputChange}
-            required
           />
         </div>
         <div className="col-6 mb-3">
@@ -235,7 +232,6 @@ function UserManagement() {
             placeholder="Last Name"
             value={userForm.lastname || ''}
             onChange={handleInputChange}
-            required
           />
         </div>
         <div className="col-12 mb-3">

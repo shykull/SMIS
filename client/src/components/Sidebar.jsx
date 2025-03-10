@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh  } from '@fortawesome/free-solid-svg-icons';
 
 function Sidebar() {
   return (
@@ -38,16 +38,19 @@ function Sidebar() {
         <div className="offcanvas-body">
           <ul className="nav flex-column">
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard/user-management">User Management</Link>
+              <Link className="nav-link" to="/dashboard/user-management"><FontAwesomeIcon icon={faUsersGear} size="xl" style={{ marginRight: '5px' }} />User Management</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard/property-management">Property Management</Link>
+              <Link className="nav-link" to="/dashboard/annoucement-management"><FontAwesomeIcon icon={faVolumeHigh} size="xl" style={{ marginRight: '5px' }} />Annoucement Management</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard/visitor-management">Visitor Management</Link>
+              <Link className="nav-link" to="/dashboard/property-management"><FontAwesomeIcon icon={faBuildingLock} size="xl" style={{ marginRight: '5px' }} />Property Management</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard/task-management">Task Management</Link>
+              <Link className="nav-link" to="/dashboard/visitor-management"><FontAwesomeIcon icon={faAddressBook} size="xl" style={{ marginRight: '5px' }} />Visitor Management</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/dashboard/task-management"><FontAwesomeIcon icon={faListCheck} size="xl" style={{ marginRight: '5px' }} />Task Management</Link>
             </li>
           </ul>
         </div>

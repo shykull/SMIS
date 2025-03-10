@@ -8,6 +8,7 @@ import PropertyManagement from './PropertyManagement';
 import TaskManagement from './TaskManagement';
 import VisitorManagement from './VisitorManagement';
 import AdminOverview from './AdminOverview';
+import AnnoucementManagement from './AnnoucementManagement';
 
 function Dashboard() {
   const { auth } = useContext(AuthContext); // Access auth context
@@ -55,6 +56,7 @@ function Dashboard() {
         <Routes>
           <Route path="" element={<AdminOverview />} />
           <Route path="user-management" element={<UserManagement />} />
+          <Route path="annoucement-management" element={<AnnoucementManagement />} />
           <Route path="property-management" element={<PropertyManagement />} />
           <Route path="visitor-management" element={<VisitorManagement />} />
           <Route path="task-management" element={<TaskManagement />} />
