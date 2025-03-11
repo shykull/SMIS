@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
         const userExists = await Users.findOne({ where: { username: username } });
 
         if (userExists) {
-            return res.status(400).json({ error: "Username already taken" });
+            return res.status(400).json({ message: "Username already taken" });
         }
 
         // If username does not exist, hash the password and create the user
@@ -49,7 +49,7 @@ router.post("/", async (req, res) => {
         await Users.create({ username: username, password: hash }); // Await user creation
         res.json("Success!");
     } catch (error) {
-        res.status(500).json({ error: "Something went wrong!" });
+        res.status(500).json({ message: "Something went wrong!" });
     }
 });
 
@@ -59,14 +59,14 @@ router.post("/login", async (req, res) => {
         const user = await Users.findOne({ where: { username: username }, include: [Permissions] });
 
         if (!user) {
-            return res.status(404).json({ error: "User Doesn't Exist" });
+            return res.status(404).json({ message: "User Doesn't Exist" });
         }
 
         // Check password using bcrypt
         bcrypt.compare(password, user.password)
             .then((match) => {
                 if (!match) {
-                    return res.status(400).json({ error: "Wrong username and password!" });
+                    return res.status(400).json({ message: "Wrong username and password!" });
                 }
 
                 // Generate a JWT token
@@ -167,6 +167,12 @@ router.put('/profile', verifyToken, upload.single('profilePicture'), async (req,
 // Route to update user permissions and profile information
 router.put('/updateUser', verifyToken, async (req, res) => {
     const { id, username, email, contact, firstname, lastname, password, permissions } = req.body;
+
+    const userExists = await Users.findOne({ where: { username: username } });
+
+    if (userExists) {
+        return res.status(400).json({ message: "Username already taken" });
+    }
 
     // Construct update data conditionally
     const updateData = { username, email, contact, firstname, lastname };
