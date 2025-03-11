@@ -11,3 +11,13 @@
   visibility: hidden;
   transition: opacity 0.3s ease;
 }
+
+.card-body {
+  max-height: 300px; /* Adjust the height as needed */
+  overflow: auto;
+}
+
+.card-text {
+  white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  word-wrap: break-word; /* Break long words */
+}

@@ -19,7 +19,7 @@ app.use("/api/user", usersRouter);
 const buildingRouter = require('./routes/Buildings');
 app.use("/api/build", buildingRouter);
 const announceRouter = require('./routes/Announce');
-app.use("/api/build", announceRouter);
+app.use("/api/announce", announceRouter);
 
 db.sequelize.sync()
   .then(() => {

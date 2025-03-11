@@ -9,6 +9,8 @@ import Registration from "./pages/Registration";
 import PageNotFound from "./pages/PageNotFound";
 import {AuthProvider } from './helpers/AuthContext'
 import Dashboard from './pages/Dashboard';
+import Annoucement from './pages/Annoucement';
+import AnnouncementDetail from './pages/AnnouncementDetail';
 
 function App() {
 
@@ -23,6 +25,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/registration" element={<Registration />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/annoucement" element={<Annoucement />} />
+              <Route path="/annoucement/:id" element={<AnnouncementDetail />} />
               <Route path="/dashboard/*" element={<Dashboard />} />
               <Route path="*" element={<PageNotFound />} />
             </Routes>

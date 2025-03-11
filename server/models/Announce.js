@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
         },
 
         content: {
-            type: DataTypes.TEXT,
+            type: DataTypes.BLOB('medium'),
             allowNull: false,
         },
 

@@ -60,23 +60,20 @@ function Home() {
     </div>
 
     <div className='row'>
-      <h3>Announcements</h3>
+    <h3>Announcements</h3>
 
-      <Carousel className="mb-4">
+    <Link to="/annoucement"><Carousel className="mb-4">
         {announcements.map((announcement, index) => (
           <Carousel.Item key={index}>
-            <img
-              className="d-block w-100"
-              src={announcement.attachment || 'default-announcement.jpg'}
-              alt={`Slide ${index + 1}`}
-            />
-            <Carousel.Caption>
-              <h3>{announcement.title}</h3>
-              <p>{announcement.content}</p>
-            </Carousel.Caption>
+            <Card>
+            <Card.Body>
+              <Card.Title>{announcement.title}</Card.Title>
+              <Card.Text dangerouslySetInnerHTML={{ __html: announcement.content }}></Card.Text>
+            </Card.Body>
+            </Card>
           </Carousel.Item>
         ))}
-      </Carousel>
+      </Carousel></Link>
     </div>
 
       <Row className="g-4">

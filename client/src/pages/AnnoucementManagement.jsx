@@ -6,8 +6,11 @@ import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'; // Import Bootstr
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs5';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Import Quill CSS
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVolumeHigh } from '@fortawesome/free-solid-svg-icons';
+import { stripHtml } from '../helpers/stripHtml';
 
 function AnnoucementManagement() {
   const [announcements, setAnnouncements] = useState([]);
@@ -48,6 +51,10 @@ function AnnoucementManagement() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleContentChange = (value) => {
+    setFormData({ ...formData, content: value });
   };
 
   const handleFileChange = (e) => {
@@ -98,6 +105,12 @@ function AnnoucementManagement() {
     }
   };
 
+  const truncateContent = (content) => {
+    const strippedContent = stripHtml(content);
+    const lines = strippedContent.split('\n');
+    return lines.slice(0, 2).join('\n');
+  };
+
   return (
     <div className="container mt-4">
       <h1>Announcement Management</h1>
@@ -107,7 +120,7 @@ function AnnoucementManagement() {
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
         </div>
       )}
-      <Button className="mb-3" variant="primary" onClick={() => handleShowModal()}> <FontAwesomeIcon icon={faVolumeHigh} size="l" style={{ marginRight: '5px' }} /> Create Announcement</Button>
+      <Button className="mb-3" variant="primary" onClick={() => handleShowModal()}> <FontAwesomeIcon icon={faVolumeHigh} size="lg" style={{ marginRight: '5px' }} /> Create Announcement</Button>
       <table id="announcementTable" className="table table-striped table-bordered">
         <thead>
           <tr>
@@ -121,7 +134,7 @@ function AnnoucementManagement() {
           {announcements.map((announcement) => (
             <tr key={announcement.id}>
               <td>{announcement.title}</td>
-              <td>{announcement.content}</td>
+              <td>{truncateContent(announcement.content)}</td>
               <td>{announcement.attachment}</td>
               <td>
                 <Button variant="warning" size="sm" onClick={() => handleShowModal(announcement)}>Edit</Button>{' '}
@@ -150,13 +163,25 @@ function AnnoucementManagement() {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Content</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="content"
+              <ReactQuill
                 value={formData.content}
-                onChange={handleInputChange}
-                required
+                onChange={handleContentChange}
+                modules={{
+                  toolbar: [
+                    [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+                    [{size: []}],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                    [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+                    ['image', 'video'],
+                    ['clean']
+                  ],
+                }}
+                formats={[
+                  'header', 'font', 'size',
+                  'bold', 'italic', 'underline', 'strike', 'blockquote',
+                  'list', 'bullet', 'indent',
+                  'image', 'video'
+                ]}
               />
             </Form.Group>
             <Form.Group className="mb-3">
