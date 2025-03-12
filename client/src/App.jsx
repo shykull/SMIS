@@ -11,6 +11,7 @@ import {AuthProvider } from './helpers/AuthContext'
 import Dashboard from './pages/Dashboard';
 import Annoucement from './pages/Annoucement';
 import AnnouncementDetail from './pages/AnnouncementDetail';
+import Visitor from './pages/Visitor';
 
 function App() {
 
@@ -27,6 +28,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/annoucement" element={<Annoucement />} />
               <Route path="/annoucement/:id" element={<AnnouncementDetail />} />
+              <Route path="/visitor" element={<Visitor />} />              
               <Route path="/dashboard/*" element={<Dashboard />} />
               <Route path="*" element={<PageNotFound />} />
             </Routes>

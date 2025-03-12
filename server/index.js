@@ -20,6 +20,8 @@ const buildingRouter = require('./routes/Buildings');
 app.use("/api/build", buildingRouter);
 const announceRouter = require('./routes/Announce');
 app.use("/api/announce", announceRouter);
+const visitorRouter = require('./routes/Visitor');
+app.use("/api/visitor", visitorRouter);
 
 db.sequelize.sync()
   .then(() => {

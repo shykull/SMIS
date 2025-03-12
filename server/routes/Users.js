@@ -59,14 +59,14 @@ router.post("/login", async (req, res) => {
         const user = await Users.findOne({ where: { username: username }, include: [Permissions] });
 
         if (!user) {
-            return res.status(404).json({ message: "User Doesn't Exist" });
+            return res.status(404).json({ error: "User Doesn't Exist" });
         }
 
         // Check password using bcrypt
         bcrypt.compare(password, user.password)
             .then((match) => {
                 if (!match) {
-                    return res.status(400).json({ message: "Wrong username and password!" });
+                    return res.status(400).json({ error: "Wrong username and password!" });
                 }
 
                 // Generate a JWT token
