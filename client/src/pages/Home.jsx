@@ -63,10 +63,10 @@ function Home() {
       <div className='row'>
         <h3>Announcements</h3>
         <Link to="/annoucement">
-          <Carousel className="mb-4">
+          <Carousel className="mb-4 shadow rounded">
             {announcements.map((announcement, index) => (
               <Carousel.Item key={index}>
-                <Card>
+                <Card className="h-100">
                   <Card.Body>
                     <Card.Title>{announcement.title}</Card.Title>
                     <Card.Text dangerouslySetInnerHTML={{ __html: announcement.content }}></Card.Text>
@@ -82,7 +82,7 @@ function Home() {
     <Row className="g-4">
       <Col md={4}>
         <Link to="/visitor" className="text-decoration-none">
-          <Card className="h-100">
+          <Card className="h-100 shadow rounded">
             <Card.Body>
               <Card.Title>👥 Visitor</Card.Title>
               <Card.Text>
@@ -96,7 +96,7 @@ function Home() {
         <>
           <Col md={4}>
             <Link to="/facilities-booking" className="text-decoration-none">
-              <Card className="h-100">
+              <Card className="h-100 shadow rounded">
                 <Card.Body>
                   <Card.Title>🗓️ Facilities Booking</Card.Title>
                   <Card.Text>Book facilities easily.</Card.Text>
@@ -106,7 +106,7 @@ function Home() {
           </Col>
           <Col md={4}>
             <Link to="/bills" className="text-decoration-none">
-              <Card className="h-100">
+              <Card className="h-100 shadow rounded">
                 <Card.Body>
                   <Card.Title>🧾 Bills</Card.Title>
                   <Card.Text>View and pay your bills.</Card.Text>
@@ -116,7 +116,7 @@ function Home() {
           </Col>
           <Col md={4}>
             <Link to="/service-request" className="text-decoration-none">
-              <Card className="h-100">
+              <Card className="h-100 shadow rounded">
                 <Card.Body>
                   <Card.Title>🛎️ Service Request</Card.Title>
                   <Card.Text>Request for services.</Card.Text>
@@ -128,7 +128,7 @@ function Home() {
       )}
       <Col md={4}>
         <Link to="/feedback" className="text-decoration-none">
-          <Card className="h-100">
+          <Card className="h-100 shadow rounded">
             <Card.Body>
               <Card.Title>🗳️ Feedback</Card.Title>
               <Card.Text>Give us your feedback.</Card.Text>
@@ -138,7 +138,7 @@ function Home() {
       </Col>
       <Col md={4}>
         <Link to="/house-rules" className="text-decoration-none">
-          <Card className="h-100">
+          <Card className="h-100 shadow rounded">
             <Card.Body>
               <Card.Title>📖 House Rules</Card.Title>
               <Card.Text>Read the house rules.</Card.Text>

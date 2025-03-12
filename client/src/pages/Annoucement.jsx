@@ -40,7 +40,7 @@ function Annoucement() {
       <Row>
         {announcements.map((announcement, index) => (
           <Col md={4} key={index} className="mb-4">
-            <Card onClick={() => handleCardClick(announcement.id)} style={{ cursor: 'pointer' }}>
+            <Card className="h-100 shadow rounded" onClick={() => handleCardClick(announcement.id)} style={{ cursor: 'pointer' }}>
               <Card.Body>
                 <Card.Title>{announcement.title}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">
