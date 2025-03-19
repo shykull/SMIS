@@ -14,8 +14,27 @@ router.use(cookieParser()); // Enable cookie parsing
 router.get('/', verifyToken, async (req, res) => {
   try {
     const ownerId = req.user.id; // Assuming req.user contains the logged-in user's info
-    const visitors = await Visitors.findAll({ where: { ownerId } });
-    res.json(visitors);
+    const visitors = await Visitors.findAll({
+      where: { ownerId },
+      include: [
+        {
+          model: Users,
+          as: 'Visitor',
+          attributes: ['username']
+        }
+      ]
+    });
+
+    // Format the response to include visitorName
+    const formattedVisitors = visitors.map(visitor => ({
+      id: visitor.id,
+      visitorName: visitor.Visitor.username,
+      visitorCar: visitor.visitorCar,
+      visitStartDate: visitor.visitStartDate,
+      visitEndDate: visitor.visitEndDate
+    }));
+
+    res.json(formattedVisitors);
   } catch (error) {
     console.error('Error fetching visitors:', error);
     res.status(500).json({ message: 'Error fetching visitors' });

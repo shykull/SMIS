@@ -29,7 +29,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   });
-
+  
+  // Define associations
+  Visitors.associate = (models) => {
+    Visitors.belongsTo(models.Users, { as: 'Owner', foreignKey: 'ownerId' });
+    Visitors.belongsTo(models.Users, { as: 'Visitor', foreignKey: 'visitorId' });
+  };
 
 
   return Visitors;
