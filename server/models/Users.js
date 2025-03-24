@@ -38,9 +38,12 @@ module.exports = (sequelize, DataTypes) => {
         Users.hasOne(models.Permissions, {
             onDelete: "cascade",
         });
+        Users.hasMany(models.Visitors, { as: 'OwnedVisitors', foreignKey: 'ownerId' });
+        Users.hasMany(models.Visitors, { as: 'VisitorRecords', foreignKey: 'visitorId' });
         Users.belongsToMany(models.Building, {
             through: 'UserBuildings',
             foreignKey: 'UserId',
+            as: 'Buildings',
             onDelete: "cascade",
         });
     };

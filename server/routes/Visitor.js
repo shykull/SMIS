@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { Visitors, Users } = require('../models');
+const { Visitors, Users,Building } = require('../models');
 const { verifyToken } = require('../middleware/AuthMiddleware');
 const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
+const { Op } = require('sequelize'); // Import Op from Sequelize
 
 const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
@@ -13,9 +14,13 @@ router.use(cookieParser()); // Enable cookie parsing
 // Route to get all visitors for the logged-in user
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const ownerId = req.user.id; // Assuming req.user contains the logged-in user's info
-    const visitors = await Visitors.findAll({
-      where: { ownerId },
+    const userId = req.user.id; // Assuming req.user contains the logged-in user's info
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // First, try to find visitors by ownerId
+    let visitors = await Visitors.findAll({
+      where: { ownerId: userId },
       include: [
         {
           model: Users,
@@ -24,6 +29,50 @@ router.get('/', verifyToken, async (req, res) => {
         }
       ]
     });
+
+    // If no visitors found by ownerId, try to find visitors by visitorId
+    if (visitors.length === 0) {
+      visitors = await Visitors.findAll({
+        where: { 
+          visitorId: userId,
+          visitEndDate: {
+            [Op.gte]: today // Only include visitors with visitStartDate today or in the future
+          }
+         },
+        include: [
+          {
+            model: Users,
+            as: 'Owner',
+            attributes: ['username', 'id','contact'],
+            include: [
+              {
+                model: Building,
+                as: 'Buildings',
+                through: { attributes: [] }, // Exclude join table attributes
+                attributes: ['block', 'level', 'unit']
+              }
+            ]
+          }
+        ]
+      });
+
+      // Format the response to include ownerName
+      const formattedVisitors = visitors.map(visitor => ({
+        id: visitor.Owner.id,
+        ownerName: visitor.Owner.username,
+        ownerContact: visitor.Owner.contact,
+        ownerBuilding: visitor.Owner.Buildings.map(building => ({
+          block: building.block,
+          level: building.level,
+          unit: building.unit
+        })),
+        visitorCar: visitor.visitorCar,
+        visitStartDate: visitor.visitStartDate,
+        visitEndDate: visitor.visitEndDate
+      }));
+
+      return res.json(formattedVisitors);
+    }
 
     // Format the response to include visitorName
     const formattedVisitors = visitors.map(visitor => ({

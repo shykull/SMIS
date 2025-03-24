@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         Building.belongsToMany(models.Users, {
             through: 'UserBuildings',
             foreignKey: 'BuildingId',
+            as: 'Users',
             onDelete: "cascade",
         });
     };
