@@ -36,7 +36,7 @@ router.get('/all', verifyToken, async (req, res) => {
 
 router.post("/", async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, email, contact, firstname, lastname, password } = req.body;
         // Check if the username already exists
         const userExists = await Users.findOne({ where: { username: username } });
 
@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
 
         // If username does not exist, hash the password and create the user
         const hash = await bcrypt.hash(password, 10); // Await bcrypt hash result
-        await Users.create({ username: username, password: hash }); // Await user creation
+        await Users.create({ username: username, password: hash, email: email, firstname: firstname, lastname: lastname, contact: contact }); // Await user creation
         res.json("Success!");
     } catch (error) {
         res.status(500).json({ message: "Something went wrong!" });
@@ -170,7 +170,8 @@ router.put('/updateUser', verifyToken, async (req, res) => {
 
     const userExists = await Users.findOne({ where: { username: username } });
 
-    if (userExists) {
+    // Check if the username is taken by another user
+    if (userExists && userExists.id !== id) {
         return res.status(400).json({ message: "Username already taken" });
     }
 

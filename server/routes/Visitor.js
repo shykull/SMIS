@@ -194,7 +194,7 @@ router.post('/', verifyToken, async (req, res) => {
 
     if (!visitor) {
       // If the visitor does not exist, create a new user with the default password
-      const hashedPassword = await bcrypt.hash('123456', 10);
+      const hashedPassword = await bcrypt.hash(visitorName, 10);
       visitor = await Users.create({
         username: visitorName,
         password: hashedPassword

@@ -2,6 +2,7 @@ import React, { useEffect, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../helpers/AuthContext';
 import axios from "axios";
+import { Form, Button, Container, Table, Modal, Row,Col } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'; // Import Bootstrap DataTables CSS
 import $ from "jquery";
@@ -17,6 +18,7 @@ function UserManagement() {
   const [users, setUsers] = useState([]);
   const [userForm, setUserForm] = useState({ id: '', username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} });
   const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
+  const [showModal, setShowModal] = useState(false); // State to handle modal visibility
   // State to handle alert visibility, message, and type
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState(''); // New state for alert type
@@ -73,7 +75,6 @@ function UserManagement() {
   const fetchUsers = async () => {
     const response = await axios.get('http://localhost:3001/api/user/all', { withCredentials: true }); // Adjust your API endpoint
     setUsers(response.data);
-   // console.log(response.data);
   };
 
   const handleInputChange = (e) => {
@@ -126,7 +127,7 @@ function UserManagement() {
         setAlertType('success'); // Set alert type to success
       }
       fetchUsers();
-      setUserForm({ id: '', username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} }); // Reset form
+      handleCloseModal(); // Close modal after submission
     } catch (error) {
       setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
       setAlertType('danger'); // Set alert type to danger
@@ -155,6 +156,7 @@ function UserManagement() {
         security: user.Permission.security,
       }
     });
+    setShowModal(true); // Show modal for editing
   };
 
   const handleDelete = async (id, username) => {
@@ -202,6 +204,15 @@ function UserManagement() {
     }
   };
 
+  const handleShowModal = () => {
+    setUserForm({ id: '', username: '', email: '', contact: '', firstname: '', lastname: '', password: '', permissions: {} });
+    setShowModal(true); // Show modal for adding new user
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false); // Close modal
+  };
+
   const csvHeaders = [
     { label: "username", key: "username" },
     { label: "email", key: "email" },
@@ -211,106 +222,19 @@ function UserManagement() {
   ];
 
   return (
-    <div className="container mt-4">
+    <Container className="mt-4">
       <h1>User Management</h1>
       {/* Bootstrap dismissible alert */}
       {alertMessage && (
-        <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
-          {alertMessage}
-          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
-        </div>
+              <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
+                {alertMessage}
+                <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
+              </div>
       )}
-      <form onSubmit={handleSubmit} className="row mb-4">
-        <input
-          type="hidden"
-          name="id"
-          value={userForm.id || ''}
-        />
-        <div className="col-12 mb-3">
-          <input
-            type="text"
-            name="username"
-            className="form-control"
-            placeholder="Username"
-            value={userForm.username || ''}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="col-6 mb-3">
-          <input
-            type="email"
-            name="email"
-            className="form-control"
-            placeholder="Email"
-            value={userForm.email || ''}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="col-6 mb-3">
-          <input
-            type="text"
-            name="contact"
-            className="form-control"
-            placeholder="Contact"
-            value={userForm.contact || ''}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="col-6 mb-3">
-          <input
-            type="text"
-            name="firstname"
-            className="form-control"
-            placeholder="First Name"
-            value={userForm.firstname || ''}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="col-6 mb-3">
-          <input
-            type="text"
-            name="lastname"
-            className="form-control"
-            placeholder="Last Name"
-            value={userForm.lastname || ''}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="col-12 mb-3">
-          <input
-            type="password"
-            name="password"
-            className="form-control"
-            placeholder="Reset Password"
-            value={userForm.password || ''}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="row mb-3">
-          <h4>Permissions</h4>
-          {Object.keys(userForm.permissions).length > 0 && (
-            <>
-              {Object.keys(userForm.permissions).map((permission) => (
-                <div key={permission} className="form-check col-4">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={userForm.permissions[permission] || false}
-                    onChange={() => handlePermissionsChange(permission)}
-                  />
-                  <label className="form-check-label">{permission}</label>
-                </div>
-              ))}
-            </>
-          )}
-        </div>
-        <button type="submit" className="btn btn-primary">
-          {userForm.id ? 'Update User' : 'Add User'}
-        </button>
-      </form>
-      
-      <table id="userTable" className="table table-striped table-bordered">
+      <Button variant="primary" onClick={handleShowModal}>
+        Add New User
+      </Button>
+      <Table id="userTable" striped bordered hover className="mt-4">
         <thead>
           <tr>
             <th>Username</th>
@@ -330,13 +254,17 @@ function UserManagement() {
               <td>{user.firstname}</td>
               <td>{user.lastname}</td>
               <td>
-                <button onClick={() => handleEdit(user)} className="btn btn-warning btn-sm me-1">🖊️ Edit</button>
-                <button onClick={() => handleDelete(user.id, user.username)} className="btn btn-danger btn-sm">🗑️ Delete</button>
+                <Button variant="warning" className="me-2" size="sm" onClick={() => handleEdit(user)}>
+                  Edit
+                </Button>
+                <Button variant="danger" className="me-2" size="sm" onClick={() => handleDelete(user.id, user.username)} disabled={userProfile.id === user.id}>
+                  Delete
+                </Button>
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
       <CSVLink
         data={users}
         headers={csvHeaders}
@@ -350,9 +278,102 @@ function UserManagement() {
       <h4 className="mt-4">Bulk Upload User CSV</h4>
       <div className="input-group mb-4">
         <input type="file" className="form-control" accept=".csv" onChange={handleFileChange} />
-        <button onClick={handleFileUpload} className="btn btn-success">Upload</button>
-      </div>    
-    </div>
+        <Button onClick={handleFileUpload} className="btn btn-success">Upload</Button>
+      </div>
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{userForm.id ? 'Edit User' : 'Add User'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            {/* Bootstrap dismissible alert */}
+            {alertMessage && (
+              <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
+                {alertMessage}
+                <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
+              </div>
+            )}
+            <input type="hidden" name="id" value={userForm.id || ''} />
+            <Form.Group controlId="formUsername" className="mb-3">
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                type="text"
+                name="username"
+                value={userForm.username || ''}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmail" className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={userForm.email || ''}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formContact" className="mb-3">
+              <Form.Label>Contact</Form.Label>
+              <Form.Control
+                type="text"
+                name="contact"
+                value={userForm.contact || ''}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formFirstName" className="mb-3">
+              <Form.Label>First Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="firstname"
+                value={userForm.firstname || ''}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formLastName" className="mb-3">
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="lastname"
+                value={userForm.lastname || ''}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formPassword" className="mb-3">
+              <Form.Label>Reset Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                value={userForm.password || ''}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <h4>Permissions</h4>
+            <Row className="mb-3">
+              {Object.keys(userForm.permissions).length > 0 && (
+                <>
+                  {Object.keys(userForm.permissions).map((permission) => (
+                    <Form.Group as={Col} key={permission} controlId={`formPermission${permission}`}>
+                      <Form.Check
+                        type="checkbox"
+                        label={permission}
+                        checked={userForm.permissions[permission] || false}
+                        onChange={() => handlePermissionsChange(permission)}
+                      />
+                    </Form.Group>
+                  ))}
+                </>
+              )}
+            </Row>
+            <Button variant="primary" type="submit">
+              {userForm.id ? 'Update User' : 'Add User'}
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+    </Container>
   );
 }
 

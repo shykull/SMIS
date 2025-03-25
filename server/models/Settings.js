@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     visit_days: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 7
+      defaultValue: 30
     },
     visit_hours: {
       type: DataTypes.INTEGER,

@@ -14,7 +14,6 @@ function VisitorManagement() {
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState({});
   const [visitors, setVisitors] = useState([]);
-  const [visitorSetting, setVisitorSetting] = useState({});
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settingsFormData, setSettingsFormData] = useState({
     visit_days: '',
@@ -70,7 +69,6 @@ function VisitorManagement() {
   const fetchVisitorsSetting = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/visitor/setting', { withCredentials: true });
-      setVisitorSetting(response.data);
       setSettingsFormData(response.data);
     } catch (error) {
       console.error('Error fetching Visitor Settings:', error);
@@ -112,8 +110,8 @@ function VisitorManagement() {
   return (
     <Container className="mt-4">
       <h1>Visitor Management</h1>
-      <Button variant="primary" onClick={handleShowSettingsModal}>
-        Update Settings
+      <Button className="mt-2 mb-3" variant="primary" onClick={handleShowSettingsModal}>
+        Update Global Visitor Settings
       </Button>
 
       <Table id="visitorTable" striped bordered hover className="mt-4">
@@ -153,7 +151,7 @@ function VisitorManagement() {
 
       <Modal show={showSettingsModal} onHide={handleCloseSettingsModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Update Visitor Settings</Modal.Title>
+          <Modal.Title>Update Global Visitor Settings</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSettingsSubmit}>

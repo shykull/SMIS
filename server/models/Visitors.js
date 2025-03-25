@@ -5,7 +5,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: 'Users', // Name of the referenced model
-        key: 'id' // Key in the referenced model
+        key: 'id', // Key in the referenced model
+        onDelete: 'CASCADE' // Cascade delete
       }
     },
     visitorId: {
@@ -13,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: 'Users', // Name of the referenced model
-        key: 'id' // Key in the referenced model
+        key: 'id', // Key in the referenced model
+        onDelete: 'CASCADE' // Cascade delete
       }
     },
     visitorCar: {
