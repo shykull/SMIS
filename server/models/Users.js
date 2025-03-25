@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
             as: 'Buildings',
             onDelete: "cascade",
         });
+        Users.hasMany(models.Vehicles, { as: 'Vehicles', foreignKey: 'ownerId' });
     };
 
     Users.afterCreate(async (user, options) => {

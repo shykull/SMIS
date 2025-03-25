@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 7
       },
+    owner_car: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 2
+      },
 });
   
 // Define associations

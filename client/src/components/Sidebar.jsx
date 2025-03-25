@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh  } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh, faCar  } from '@fortawesome/free-solid-svg-icons';
 
 function Sidebar() {
   return (
@@ -39,6 +39,9 @@ function Sidebar() {
           <ul className="nav flex-column">
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard/user-management"><FontAwesomeIcon icon={faUsersGear} size="xl" style={{ marginRight: '5px' }} />User Management</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/dashboard/vehicle-management"><FontAwesomeIcon icon={faCar} size="xl" style={{ marginRight: '5px' }} />Vehicle Management</Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard/annoucement-management"><FontAwesomeIcon icon={faVolumeHigh} size="xl" style={{ marginRight: '5px' }} />Annoucement Management</Link>

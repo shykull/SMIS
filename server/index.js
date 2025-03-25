@@ -22,6 +22,9 @@ const announceRouter = require('./routes/Announce');
 app.use("/api/announce", announceRouter);
 const visitorRouter = require('./routes/Visitor');
 app.use("/api/visitor", visitorRouter);
+const vehicleRouter = require('./routes/Vehicles');
+app.use("/api/vehicle", vehicleRouter);
+
 
 db.sequelize.sync()
   .then(() => {
