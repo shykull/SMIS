@@ -89,7 +89,8 @@ function Visitor() {
       const maxStartDate = new Date();
       maxStartDate.setDate(maxStartDate.getDate() + (visitorSetting.visit_days)); // Default to 7 days if not set
       if (visitStartDate > maxStartDate) {
-        alert('Visit start date cannot be more than the allowed days from today.');
+        alert(`Visit start date cannot be more than the allowed ${visitorSetting.visit_days} days from today.`);
+        setFormData({ ...formData, visitStartDate: '' });
         return;
       }
 
@@ -116,7 +117,8 @@ function Visitor() {
       const maxEndDate = new Date(visitStartDate);
       maxEndDate.setDate(maxEndDate.getDate() + (visitorSetting.visit_duration)); // Default to 7 days if not set
       if (visitEndDate > maxEndDate) {
-        alert('Visit end date cannot be more than the allowed duration from visit start date.');
+        alert(`Visit end date cannot be more than the allowed ${visitorSetting.visit_duration} days from visit start date.`);
+        setFormData({ ...formData, visitEndDate: '' });
         return;
       }
 
@@ -177,22 +179,28 @@ function Visitor() {
 
   const getMinDateTime = () => {
     const now = new Date();
-    return now.toISOString().slice(0, 16);
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16);
   };
 
   const getMaxStartDateTime = () => {
     if (!visitorSetting.visit_days) return '';
     const maxStartDate = new Date();
     maxStartDate.setDate(maxStartDate.getDate() + visitorSetting.visit_days);
-    return maxStartDate.toISOString().slice(0, 16);
+    const offset = maxStartDate.getTimezoneOffset();
+    const localDate = new Date(maxStartDate.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16);
   };
 
   const getMaxEndDateTime = () => {
     if (!formData.visitStartDate || !visitorSetting.visit_duration) return '';
     const visitStartDate = new Date(formData.visitStartDate);
-    const maxEndDate = new Date(visitStartDate);
+    const maxEndDate = new Date(visitStartDate.getTime() - visitStartDate.getTimezoneOffset() * 60000);
     maxEndDate.setDate(maxEndDate.getDate() + visitorSetting.visit_duration);
-    return maxEndDate.toISOString().slice(0, 16);
+    const offset = maxEndDate.getTimezoneOffset();
+    const localDate = new Date(maxEndDate.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16);
   };
 
   return (
@@ -287,7 +295,7 @@ function Visitor() {
                   </Form.Group>
 
                   <Form.Group as={Col} controlId="formLeavingDateTime">
-                    <Form.Label>Leaving Date & Time</Form.Label>
+                    <Form.Label>Leaving Date & Time (default {visitorSetting.visit_hours} hours) </Form.Label>
                     <Form.Control
                       type="datetime-local"
                       name="visitEndDate"

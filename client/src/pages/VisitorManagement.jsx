@@ -158,7 +158,7 @@ function VisitorManagement() {
         <Modal.Body>
           <Form onSubmit={handleSettingsSubmit}>
             <Form.Group controlId="formVisitDays">
-              <Form.Label>Visit Days</Form.Label>
+              <Form.Label>Number of days ahead allowed to Register Visitor</Form.Label>
               <Form.Control
                 type="number"
                 name="visit_days"
@@ -169,7 +169,7 @@ function VisitorManagement() {
             </Form.Group>
 
             <Form.Group controlId="formVisitHours" className="mt-3">
-              <Form.Label>Visit Hours</Form.Label>
+              <Form.Label>Default Duration in Hours for each visit</Form.Label>
               <Form.Control
                 type="number"
                 name="visit_hours"
@@ -180,7 +180,7 @@ function VisitorManagement() {
             </Form.Group>
 
             <Form.Group controlId="formVisitDuration" className="mt-3">
-              <Form.Label>Visit Duration</Form.Label>
+              <Form.Label>Maximum Visit Duration in days</Form.Label>
               <Form.Control
                 type="number"
                 name="visit_duration"
