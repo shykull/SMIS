@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../helpers/AuthContext';
 import axios from "axios";
 import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
@@ -9,6 +11,9 @@ import "datatables.net-bs5"; // Import Bootstrap integration for DataTables
 import Papa from 'papaparse'; // Import PapaParse for CSV parsing
 
 function PropertyManagement() {
+  const { auth } = useContext(AuthContext); // Access auth context
+  const navigate = useNavigate();
+  const [userProfile, setUserProfile] = useState({});
   const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
   const [alertMessage, setAlertMessage] = useState(''); // State to handle alert visibility, message, and type
   const [alertType, setAlertType] = useState(''); // New state for alert type
@@ -20,10 +25,36 @@ function PropertyManagement() {
   const [selectedTenant, setSelectedTenant] = useState(''); // State to store the selected tenant
 
   useEffect(() => {
-    fetchBuildings();
-    fetchBuildingsAssoc();
-    fetchUsers();
-  }, []);
+    if (auth.loading) {
+      // While checking auth status, do nothing or show a loader
+      return;
+    }
+
+    if (!auth.status) {
+      // If not authenticated, redirect to login
+      navigate('/login');
+    } else {
+      axios.get('http://localhost:3001/api/user/status', { withCredentials: true })
+        .then((response) => {
+          setUserProfile(response.data.user);
+          handlePermission(response.data.user.Permission)
+          .then(() => {
+            fetchBuildings();
+            fetchBuildingsAssoc();
+            fetchUsers();
+          });
+        })
+          .catch((error) => {
+            // Improved error handling: Checking for both response data and fallback to a message
+            const errorMessage = error.response && error.response.data && error.response.data.error
+              ? error.response.data.error
+              : error.message;
+  
+            setAlertMessage(errorMessage); // Display error
+          });
+      }
+    }, [auth.status, auth.loading, navigate]);
+
 
   useEffect(() => {
     // Initialize DataTable after buildings data is fetched
@@ -31,6 +62,19 @@ function PropertyManagement() {
       $('#buildTable').DataTable();
     }
   }, [buildings]);
+
+  const handlePermission = (permission) => {
+    return new Promise((resolve, reject) => {
+      const allowedRoles = ['sys_admin', 'prop_manager', 'site_manager'];
+      const hasPermission = allowedRoles.some(role => permission[role]);
+      if (!hasPermission) {
+        navigate('/');
+        reject();
+      } else {
+        resolve();
+      }
+    });
+  };
 
   const fetchBuildings = async () => {
     try {

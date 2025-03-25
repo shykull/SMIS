@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Visitors, Users,Building } = require('../models');
+const { Visitors, Users,Building,Settings } = require('../models');
 const { verifyToken } = require('../middleware/AuthMiddleware');
 const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
@@ -10,6 +10,99 @@ const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
 
 router.use(cookieParser()); // Enable cookie parsing
+
+
+//Route to get visitor settings
+router.get('/setting', verifyToken, async (req, res) => {
+  try {
+    const settings = await Settings.findOne({ where: { id: 1 } });
+
+    if (!settings) {
+      return res.status(404).json({ message: 'Settings not found' });
+    }
+    
+    res.json(settings);
+    
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({ message: 'Error fetching settings' });
+  }
+});
+
+// Route to update visitor settings
+router.put('/setting', verifyToken, async (req, res) => {
+  try {
+    const { visit_days, visit_duration, visit_hours } = req.body;
+    const settings = await Settings.findOne({ where: { id: 1 } });
+
+    if (!settings) {
+      return res.status(404).json({ message: 'Settings not found' });
+    }
+
+    settings.visit_days = visit_days;
+    settings.visit_duration = visit_duration;
+    settings.visit_hours = visit_hours;
+    await settings.save();
+
+    res.json(settings);
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ message: 'Error updating settings' });
+  }
+});
+
+// Route to get all visitors for the logged-in user
+router.get('/all', verifyToken, async (req, res) => {
+  try {
+
+
+    // Find all visitors
+    let visitors = await Visitors.findAll({
+      include: [
+        {
+          model: Users,
+          as: 'Owner',
+          attributes: ['username', 'contact'],
+          include: [
+            {
+              model: Building,
+              as: 'Buildings',
+              through: { attributes: [] }, // Exclude join table attributes
+              attributes: ['block', 'level', 'unit']
+            }
+          ]
+        },
+        {
+          model: Users,
+          as: 'Visitor',
+          attributes: ['username', 'contact']
+        }
+      ]
+    });
+
+    // Format the response to include owner and visitor information
+    const formattedVisitors = visitors.map(visitor => ({
+      id: visitor.id,
+      ownerName: visitor.Owner.username,
+      ownerContact: visitor.Owner.contact,
+      ownerBuilding: visitor.Owner.Buildings.map(building => ({
+        block: building.block,
+        level: building.level,
+        unit: building.unit
+      })),
+      visitorName: visitor.Visitor.username,
+      visitorContact: visitor.Visitor.contact,
+      visitorCar: visitor.visitorCar,
+      visitStartDate: visitor.visitStartDate,
+      visitEndDate: visitor.visitEndDate
+    }));
+
+    return res.json(formattedVisitors);
+  } catch (error) {
+    console.error('Error fetching visitors:', error);
+    res.status(500).json({ message: 'Error fetching visitors' });
+  }
+});
 
 // Route to get all visitors for the logged-in user
 router.get('/', verifyToken, async (req, res) => {

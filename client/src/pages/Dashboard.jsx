@@ -29,6 +29,7 @@ function Dashboard() {
       axios.get('http://localhost:3001/api/user/status', { withCredentials: true })
               .then((response) => {
                   setUserProfile(response.data.user);
+                  handlePermission(response.data.user.Permission);
               })
               .catch((error) => {
                   // Improved error handling: Checking for both response data and fallback to a message
@@ -40,6 +41,14 @@ function Dashboard() {
               });
     }
   }, [auth.status, auth.loading, navigate]);
+
+  const handlePermission = (permission) => {
+    const allowedRoles = ['sys_admin', 'prop_manager', 'site_manager'];
+    const hasPermission = allowedRoles.some(role => permission[role]);
+    if (!hasPermission) {
+      navigate('/');
+    }
+  };
 
   return (
     <div className="d-flex">
