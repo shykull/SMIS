@@ -256,8 +256,6 @@ function PropertyManagement() {
       <table id="buildTable" className="table table-striped table-bordered">
         <thead>
           <tr>
-            <th>Block</th>
-            <th>Level</th>
             <th>Unit</th>
             <th>Owner Name</th>
             <th>Owner Contact</th>
@@ -269,9 +267,7 @@ function PropertyManagement() {
         <tbody>
           {buildings.map((building) => (
             <tr key={building.id}>
-              <td className="text-center">{building.block}</td>
-              <td className="text-center">{building.level}</td>
-              <td className="text-center">{building.unit}</td>
+              <td className="text-center">{building.block}-{building.level}-{building.unit}</td>
               <td>{building.OwnerName}</td>
               <td>{building.OwnerContact}</td>
               <td>{building.TenantName}</td>

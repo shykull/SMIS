@@ -24,6 +24,9 @@ function Visitor() {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editVisitorId, setEditVisitorId] = useState(null);
+    // State to handle alert visibility, message, and type
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState(''); // New state for alert type
 
   useEffect(() => {
     if (auth.loading) {
@@ -131,6 +134,23 @@ function Visitor() {
     }
   };
 
+  const handleDelete = async (id,username) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete this Visitor "${username}"?`);
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:3001/api/user/${id}`, { withCredentials: true });
+      setAlertMessage('Visitor deleted successfully');
+      setAlertType('success'); // Set alert type to success
+      fetchVisitors();
+    } catch (error) {
+      setAlertMessage('Error: ' + (error.response?.data?.message || error.message));
+      setAlertType('danger'); // Set alert type to danger
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -140,9 +160,12 @@ function Visitor() {
         await axios.post('http://localhost:3001/api/visitor', formData, { withCredentials: true });
       }
       fetchVisitors();
+      setAlertMessage('Visitor successfully registered/updated');
+      setAlertType('success'); // Set alert type to success
       handleCloseModal();
     } catch (error) {
-      console.error('Error registering visitor:', error);
+      setAlertMessage('Error registering visitor:' + (error.response?.data?.message || error.message));
+      setAlertType('danger'); // Set alert type to danger
     }
   };
 
@@ -209,7 +232,7 @@ function Visitor() {
     }
   
     // Add hourly options up to 24 hours
-    for (let i = visitHours; i <= 24; i += visitHours) {
+    for (let i = visitHours; i < 24; i += visitHours) {
       const optionDate = new Date(visitStartDate.getTime() - offset * 60 * 1000);
       optionDate.setHours(optionDate.getHours() + i);
       options.push({
@@ -219,7 +242,7 @@ function Visitor() {
     }
   
     // Add daily options
-    for (let i = 2; i <= visitDays; i++) {
+    for (let i = 1; i <= visitDays; i++) {
       const optionDate = new Date(visitStartDate.getTime() - offset * 60 * 1000);
       optionDate.setDate(optionDate.getDate() + i);
       options.push({
@@ -274,6 +297,13 @@ function Visitor() {
       ) : (
         <div>
           <h1>Visitor Registration</h1>
+          {/* Bootstrap dismissible alert */}
+          {alertMessage && (
+                  <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
+                    {alertMessage}
+                    <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
+                  </div>
+          )}
           <Button variant="primary" onClick={handleShowModal}>
             Register Visitor
           </Button>
@@ -366,8 +396,11 @@ function Visitor() {
                   <td>{new Date(visitor.visitStartDate).toLocaleString()}</td>
                   <td>{new Date(visitor.visitEndDate).toLocaleString()}</td>
                   <td>
-                    <Button variant="warning" size="sm" onClick={() => handleEdit(visitor)}>
+                    <Button variant="warning" className="me-2" size="sm" onClick={() => handleEdit(visitor)}>
                       Edit
+                    </Button>
+                    <Button variant="danger" className="me-2" size="sm" onClick={() => handleDelete(visitor.visitorId, visitor.visitorName)}>
+                      Delete
                     </Button>
                   </td>
                 </tr>

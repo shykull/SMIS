@@ -34,8 +34,8 @@ function VehicleManagement() {
           setUserProfile(response.data.user);
           handlePermission(response.data.user.Permission)
           .then(() => {
-            fetchVechicles();
             fetchVehicleSetting();
+            fetchVechicles();
           });
         })
         .catch((error) => {
@@ -60,6 +60,24 @@ function VehicleManagement() {
         resolve();
       }
     });
+  };
+
+  const fetchVehicleSetting = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/vehicle/setting', { withCredentials: true });
+      setSettingsFormData(response.data);
+    } catch (error) {
+      console.error('Error fetching Visitor Settings:', error);
+    }
+  };
+
+  const fetchVechicles = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/vehicle/all', { withCredentials: true });
+      setVehicles(response.data);
+    } catch (error) {
+      console.error('Error fetching visitors:', error);
+    }
   };
 
   return (

@@ -118,7 +118,7 @@ router.get('/', verifyToken, async (req, res) => {
         {
           model: Users,
           as: 'Visitor',
-          attributes: ['username']
+          attributes: ['username','id']
         }
       ]
     });
@@ -171,6 +171,7 @@ router.get('/', verifyToken, async (req, res) => {
     const formattedVisitors = visitors.map(visitor => ({
       id: visitor.id,
       visitorName: visitor.Visitor.username,
+      visitorId: visitor.Visitor.id,
       visitorCar: visitor.visitorCar,
       visitStartDate: visitor.visitStartDate,
       visitEndDate: visitor.visitEndDate
