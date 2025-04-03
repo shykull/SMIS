@@ -193,14 +193,42 @@ function Visitor() {
     return localDate.toISOString().slice(0, 16);
   };
 
-  const getMaxEndDateTime = () => {
-    if (!formData.visitStartDate || !visitorSetting.visit_duration) return '';
-    const visitStartDate = new Date(formData.visitStartDate);
-    const maxEndDate = new Date(visitStartDate.getTime() - visitStartDate.getTimezoneOffset() * 60000);
-    maxEndDate.setDate(maxEndDate.getDate() + visitorSetting.visit_duration);
-    const offset = maxEndDate.getTimezoneOffset();
-    const localDate = new Date(maxEndDate.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().slice(0, 16);
+  const generateDurationOptions = () => {
+    const options = [];
+    const visitHours = visitorSetting.visit_hours || 8; // Default to 8 hours
+    const visitDays = visitorSetting.visit_duration || 7; // Default to 7 days
+  
+    // Use the visitStartDate from formData or fallback to the current date
+    const visitStartDate = formData.visitStartDate ? new Date(formData.visitStartDate) : new Date();
+    const offset = visitStartDate.getTimezoneOffset();
+  
+    // Ensure visitStartDate is valid
+    if (isNaN(visitStartDate.getTime())) {
+      console.error("Invalid visitStartDate:", formData.visitStartDate);
+      return options; // Return an empty array if the date is invalid
+    }
+  
+    // Add hourly options up to 24 hours
+    for (let i = visitHours; i <= 24; i += visitHours) {
+      const optionDate = new Date(visitStartDate.getTime() - offset * 60 * 1000);
+      optionDate.setHours(optionDate.getHours() + i);
+      options.push({
+        value: optionDate.toISOString().slice(0, 16),
+        label: `${i} hours`
+      });
+    }
+  
+    // Add daily options
+    for (let i = 2; i <= visitDays; i++) {
+      const optionDate = new Date(visitStartDate.getTime() - offset * 60 * 1000);
+      optionDate.setDate(optionDate.getDate() + i);
+      options.push({
+        value: optionDate.toISOString().slice(0, 16),
+        label: `${i} day${i > 1 ? 's' : ''}`
+      });
+    }
+  
+    return options;
   };
 
   return (
@@ -294,17 +322,21 @@ function Visitor() {
                     />
                   </Form.Group>
 
-                  <Form.Group as={Col} controlId="formLeavingDateTime">
-                    <Form.Label>Leaving Date & Time (default {visitorSetting.visit_hours} hours) </Form.Label>
-                    <Form.Control
-                      type="datetime-local"
+                  <Form.Group as={Col} controlId="formVisitDuration">
+                    <Form.Label>Duration of Visit</Form.Label>
+                    <Form.Select
                       name="visitEndDate"
                       value={formData.visitEndDate}
                       onChange={handleVisitEndInputChange}
-                      min={formData.visitStartDate}
-                      max={getMaxEndDateTime()}
                       required
-                    />
+                    >
+                      <option value="">Select Duration</option>
+                      {generateDurationOptions().map((option, index) => (
+                        <option key={index} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </Form.Select>
                   </Form.Group>
                 </Row>
 
