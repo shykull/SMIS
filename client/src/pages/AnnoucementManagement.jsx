@@ -180,8 +180,8 @@ function AnnoucementManagement() {
               <td>{truncateContent(announcement.content)}</td>
               <td>{announcement.attachment}</td>
               <td>
-                <Button variant="warning" size="sm" onClick={() => handleShowModal(announcement)}>Edit</Button>{' '}
-                <Button variant="danger" size="sm" onClick={() => handleDelete(announcement.id)}>Delete</Button>
+                <Button variant="warning" size="sm" className="me-2 mt-2" onClick={() => handleShowModal(announcement)}>🖊️ Edit</Button>{' '}
+                <Button variant="danger" size="sm" className="me-2 mt-2" onClick={() => handleDelete(announcement.id)}>🗑️ Delete</Button>
               </td>
             </tr>
           ))}

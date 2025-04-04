@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../helpers/AuthContext';
 import axios from "axios";
 import Select from 'react-select';
+import { Modal, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'; // Import Bootstrap DataTables CSS
 import $ from "jquery";
@@ -23,6 +24,7 @@ function PropertyManagement() {
   const [selectedBuilding, setSelectedBuilding] = useState(null); // State to store the selected building
   const [selectedOwner, setSelectedOwner] = useState(''); // State to store the selected owner
   const [selectedTenant, setSelectedTenant] = useState(''); // State to store the selected tenant
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
 
   useEffect(() => {
     if (auth.loading) {
@@ -164,6 +166,7 @@ function PropertyManagement() {
     const tenantAssoc = assoc.find(assoc => users.find(user => user.id === assoc.UserId && user.Permission.tenant));
     setSelectedOwner(ownerAssoc ? ownerAssoc.UserId : '');
     setSelectedTenant(tenantAssoc ? tenantAssoc.UserId : '');
+    setShowModal(true);
   };
 
   const handleOwnerChange = (selectedOption) => {
@@ -196,7 +199,9 @@ function PropertyManagement() {
       setAlertType('success'); // Set alert type to success
       fetchBuildingsAssoc(); // Refresh building data
       setSelectedBuilding(null); // Close the form
+      setShowModal(false);
     } catch (error) {
+      setShowModal(false);
       setAlertMessage('Error updating building: ' + (error.response?.data?.message || error.message));
       setAlertType('danger'); // Set alert type to danger
     }
@@ -223,35 +228,6 @@ function PropertyManagement() {
         </div>
       )}
 
-{selectedBuilding && (
-        <div className="mt-4">
-          <h4>Edit Building Association</h4>
-          <h5>{selectedBuilding.block} - {selectedBuilding.level} - {selectedBuilding.unit}</h5>
-          <div className="mb-3">
-            <label htmlFor="ownerSelect" className="form-label">Select Owner</label>
-            <Select
-              id="ownerSelect"
-              value={ownerOptions.find(option => option.value === selectedOwner)}
-              onChange={handleOwnerChange}
-              options={ownerOptions}
-              isClearable
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="tenantSelect" className="form-label">Select Tenant</label>
-            <Select
-              id="tenantSelect"
-              value={tenantOptions.find(option => option.value === selectedTenant)}
-              onChange={handleTenantChange}
-              options={tenantOptions}
-              isClearable
-            />
-          </div>
-          <button onClick={handleUpdate} className="btn btn-primary">Update</button>
-          <button onClick={() => setSelectedBuilding(null)} className="btn btn-secondary ms-2">Cancel</button>
-        </div>
-      )}
-
       <h4 className="mt-4">Development Avaliable Units</h4>
       <table id="buildTable" className="table table-striped table-bordered">
         <thead>
@@ -273,13 +249,49 @@ function PropertyManagement() {
               <td>{building.TenantName}</td>
               <td>{building.TenantContact}</td>
               <td>
-                <button onClick={() => handleEdit(building)} className="btn btn-warning btn-sm me-1">🖊️ Edit</button>
+                <button onClick={() => handleEdit(building)} className="btn btn-warning btn-sm me-2 mt-2">🖊️ Edit</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Building Association</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedBuilding && (
+            <>
+              <h5>{selectedBuilding.block} - {selectedBuilding.level} - {selectedBuilding.unit}</h5>
+              <div className="mb-3">
+                <label htmlFor="ownerSelect" className="form-label">Select Owner</label>
+                <Select
+                  id="ownerSelect"
+                  value={ownerOptions.find(option => option.value === selectedOwner)}
+                  onChange={handleOwnerChange}
+                  options={ownerOptions}
+                  isClearable
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="tenantSelect" className="form-label">Select Tenant</label>
+                <Select
+                  id="tenantSelect"
+                  value={tenantOptions.find(option => option.value === selectedTenant)}
+                  onChange={handleTenantChange}
+                  options={tenantOptions}
+                  isClearable
+                />
+              </div>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleUpdate}>Update</Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+        </Modal.Footer>
+      </Modal>
       
 
       <h4 className="mt-4">Bulk Upload Units CSV</h4>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Users, Permissions } = require("../models");
+const { Users, Permissions, Vehicles, Building } = require("../models");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -105,16 +105,30 @@ router.post("/logout", (req, res) => {
     res.json({ message: "Logged out successfully" });
 });
 
+//route to check if user is logged in and fetch user details
 router.get('/status', verifyToken, async (req, res) => {
     try {
         const user = await Users.findOne({
             where: { id: req.user.id },
             attributes: { exclude: ['password'] }, // Exclude sensitive fields
-            include: [Permissions]
+            include: [
+                Permissions, // Include permissions
+                {
+                    model: Building, // Include associated buildings
+                    as: 'Buildings',
+                    through: { attributes: [] }, // Exclude join table attributes
+                    attributes: ['block', 'level', 'unit']
+                },
+                {
+                    model: Vehicles, // Include associated vehicles
+                    as: 'Vehicles',
+                    attributes: ['carPlateNumber', 'approvalStatus', 'ownerComments']
+                }
+            ]
         });
+
         if (user) {
             res.json({ loggedIn: true, user });
-
         } else {
             res.json({ loggedIn: false });
         }
@@ -126,7 +140,7 @@ router.get('/status', verifyToken, async (req, res) => {
 
 // Route to update user profile
 router.put('/profile', verifyToken, upload.single('profilePicture'), async (req, res) => {
-    const { id, email, firstname, lastname, contact, address, password } = req.body;
+    const { id, email, firstname, lastname, contact, address, password, ownerComments, carPlateNumber, Permission } = req.body;
     const profilePicture = req.file ? `/profile/${req.file.filename}` : undefined; // Use undefined instead of null
 
     // Construct update data conditionally
@@ -141,6 +155,27 @@ router.put('/profile', verifyToken, upload.single('profilePicture'), async (req,
     if (password) {
         const hash = await bcrypt.hash(password, 10);
         updateData.password = hash;
+    }
+
+    if (carPlateNumber) {
+
+        // Check if the vehicle already exists
+        const existingVehicle = await Vehicles.findOne({
+            where: {
+                [Op.and]: [
+                    { ownerId: id },
+                    { carPlateNumber: carPlateNumber }
+                ]
+            }
+        });
+        
+        if (!existingVehicle) {
+            await Vehicles.create({
+                ownerId: id,
+                carPlateNumber: carPlateNumber,
+                ownerComments: ownerComments
+            });
+        }
     }
 
     try {

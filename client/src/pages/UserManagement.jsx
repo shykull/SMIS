@@ -254,11 +254,11 @@ function UserManagement() {
               <td>{user.firstname}</td>
               <td>{user.lastname}</td>
               <td>
-                <Button variant="warning" className="me-2" size="sm" onClick={() => handleEdit(user)}>
-                  Edit
+                <Button variant="warning" className="me-2 mt-2" size="sm" onClick={() => handleEdit(user)}>
+                🖊️ Edit
                 </Button>
-                <Button variant="danger" className="me-2" size="sm" onClick={() => handleDelete(user.id, user.username)} disabled={userProfile.id === user.id}>
-                  Delete
+                <Button variant="danger" className="me-2 mt-2" size="sm" onClick={() => handleDelete(user.id, user.username)} disabled={userProfile.id === user.id}>
+                🗑️ Delete
                 </Button>
               </td>
             </tr>

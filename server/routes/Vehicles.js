@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Vehicles, Users, Building, Settings } = require('../models');
-const { verifyToken } = require('../middleware/AuthMiddleware');
+const { Permissions, Vehicles, Users, Building, Settings } = require('../models');
 const cookieParser = require('cookie-parser');
+const { verifyToken } = require('../middleware/AuthMiddleware');
 const { Op } = require('sequelize'); // Import Op from Sequelize
 
 router.use(cookieParser()); // Enable cookie parsing
@@ -36,6 +36,11 @@ router.get('/all', verifyToken, async (req, res) => {
           attributes: ['username', 'contact'],
           include: [
             {
+                model: Permissions,
+                as: 'Permission',
+                attributes: ['owner', 'tenant']
+            },
+            {
               model: Building,
               as: 'Buildings',
               through: { attributes: [] }, // Exclude join table attributes
@@ -43,7 +48,8 @@ router.get('/all', verifyToken, async (req, res) => {
             }
           ]
         }
-      ]
+      ],
+      order: [[{ model: Users, as: 'Owner' }, 'username', 'ASC']] // Sort by owner's username in ascending order
     });
 
     // Format the response to include owner and visitor information
@@ -51,12 +57,15 @@ router.get('/all', verifyToken, async (req, res) => {
       id: vehicle.id,
       ownerName: vehicle.Owner.username,
       ownerContact: vehicle.Owner.contact,
+      ownerPermissions: vehicle.Owner.Permission, // Include permissions in the response
       ownerBuilding: vehicle.Owner.Buildings.map(building => ({
         block: building.block,
         level: building.level,
         unit: building.unit
       })),
-      carPlateNumber: vehicle.carPlateNumber
+      carPlateNumber: vehicle.carPlateNumber,
+      ownerComments: vehicle.ownerComments,
+      approvalStatus: vehicle.approvalStatus,
     }));
 
     return res.json(formattedVehicles);
@@ -66,5 +75,90 @@ router.get('/all', verifyToken, async (req, res) => {
   }
 });
 
+// Route to handle CSV upload and create vehicles
+router.post('/upload', verifyToken, async (req, res) => {
+    const { vehicles } = req.body;
+
+    try {
+        for (const vehicle of vehicles) {
+            // Look up the ownerId based on the username
+            const owner = await Users.findOne({ where: { username: vehicle.username } });
+
+            if (!owner) {
+                console.error(`Owner with username "${vehicle.username}" not found.`);
+                return res.status(404).json({ message: `Owner with username "${vehicle.username}" not found.` });
+            }
+
+            // Check if the vehicle already exists
+            const existingVehicle = await Vehicles.findOne({
+                where: {
+                    [Op.and]: [
+                        { ownerId: owner.id },
+                        { carPlateNumber: vehicle.carPlateNumber }
+                    ]
+                }
+            });
+
+            if (!existingVehicle) {
+                // Create the vehicle entry with the resolved ownerId
+                await Vehicles.create({
+                    ownerId: owner.id,
+                    carPlateNumber: vehicle.carPlateNumber,
+                    approvalStatus: vehicle.approvalStatus || 1, // Default to 1 if not provided
+                });
+            }
+        }
+
+        res.json({ message: 'Vehicle file uploaded successfully' });
+    } catch (error) {
+        console.error('Error uploading vehicle file:', error);
+        res.status(500).json({ message: 'Server error while uploading file' });
+    }
+});
+
+// Route to approve a vehicle
+router.put('/approve/:id', verifyToken, async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      // Find the vehicle by ID
+      const vehicle = await Vehicles.findByPk(id);
+  
+      if (!vehicle) {
+        return res.status(404).json({ message: 'Vehicle not found' });
+      }
+  
+      // Update the approval status to true
+      vehicle.approvalStatus = true;
+      await vehicle.save();
+  
+      res.json({ message: 'Vehicle Registration approved' });
+    } catch (error) {
+      console.error('Error approving vehicle:', error);
+      res.status(500).json({ message: 'Error approving vehicle' });
+    }
+  });
+
+// Route to delete a vehicle
+router.delete('/:id', verifyToken, async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      // Find the vehicle by ID
+      const vehicle = await Vehicles.findByPk(id);
+  
+      if (!vehicle) {
+        return res.status(404).json({ message: 'Vehicle not found' });
+      }
+  
+      // Delete the vehicle
+      await vehicle.destroy();
+  
+      res.json({ message: 'Vehicle Registration deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+      res.status(500).json({ message: 'Error deleting vehicle' });
+    }
+  });
 
 module.exports = router;

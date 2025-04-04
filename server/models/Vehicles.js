@@ -12,6 +12,16 @@ module.exports = (sequelize, DataTypes) => {
     carPlateNumber: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    ownerComments: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null // Default to null if not provided
+    },
+    approvalStatus: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: 0 // Default status is 0 (not approved)
     }
   });
 

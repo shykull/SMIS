@@ -396,11 +396,11 @@ function Visitor() {
                   <td>{new Date(visitor.visitStartDate).toLocaleString()}</td>
                   <td>{new Date(visitor.visitEndDate).toLocaleString()}</td>
                   <td>
-                    <Button variant="warning" className="me-2" size="sm" onClick={() => handleEdit(visitor)}>
-                      Edit
+                    <Button variant="warning" className="me-2 mt-2" size="sm" onClick={() => handleEdit(visitor)}>
+                    🖊️ Edit
                     </Button>
-                    <Button variant="danger" className="me-2" size="sm" onClick={() => handleDelete(visitor.visitorId, visitor.visitorName)}>
-                      Delete
+                    <Button variant="danger" className="me-2 mt-2" size="sm" onClick={() => handleDelete(visitor.visitorId, visitor.visitorName)}>
+                    🗑️ Delete
                     </Button>
                   </td>
                 </tr>

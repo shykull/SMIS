@@ -41,14 +41,12 @@ function Navbar() {
               <Link className="nav-link" aria-current="page" to="/">Home</Link>
             </li>
 
-            {auth.permit.sys_admin ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">Admin Dashboard</Link>
-                </li>
-              </>
-
-            ) : <></> }
+            {/* Show Admin Dashboard link only for sys_admin, prop_manager, or site_manager */}
+            {(auth.permit.sys_admin || auth.permit.prop_manager || auth.permit.site_manager) && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/dashboard">Admin Dashboard</Link>
+              </li>
+            )}
         
             {!auth.status ? (
               <>
