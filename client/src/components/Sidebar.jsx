@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh, faCar  } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 function Sidebar() {
+  const [pendingVehicleApprovals, setVehiclePendingApprovals] = useState(0);
+
+  useEffect(() => {
+    // Fetch the count of pending approvals
+    const fetchVehiclePendingApprovals = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/vehicle/pending-count', { withCredentials: true });
+        setVehiclePendingApprovals(response.data.count);
+      } catch (error) {
+        console.error('Error fetching pending approvals:', error);
+      }
+    };
+
+    fetchVehiclePendingApprovals();
+  }, []);
+
   return (
     <>
       {/* Button to toggle off-canvas */}
@@ -41,7 +58,11 @@ function Sidebar() {
               <Link className="nav-link" to="/dashboard/user-management"><FontAwesomeIcon icon={faUsersGear} size="xl" style={{ marginRight: '5px' }} />User Management</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard/vehicle-management"><FontAwesomeIcon icon={faCar} size="xl" style={{ marginRight: '5px' }} />Vehicle Management</Link>
+              <Link className="nav-link" to="/dashboard/vehicle-management"><FontAwesomeIcon icon={faCar} size="xl" style={{ marginRight: '5px' }} />Vehicle Management
+              {pendingVehicleApprovals > 0 && (
+                  <span className="badge bg-danger ms-2">{pendingVehicleApprovals}</span>
+                )}
+              </Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard/annoucement-management"><FontAwesomeIcon icon={faVolumeHigh} size="xl" style={{ marginRight: '5px' }} />Annoucement Management</Link>

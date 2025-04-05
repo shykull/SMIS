@@ -49,7 +49,10 @@ router.get('/all', verifyToken, async (req, res) => {
           ]
         }
       ],
-      order: [[{ model: Users, as: 'Owner' }, 'username', 'ASC']] // Sort by owner's username in ascending order
+      order: [
+        ['approvalStatus', 'ASC'], // Order by approvalStatus (false first, then true)
+        [{ model: Users, as: 'Owner' }, 'username', 'ASC'] // Then order by Owner's username
+      ]
     });
 
     // Format the response to include owner and visitor information
@@ -158,6 +161,19 @@ router.delete('/:id', verifyToken, async (req, res) => {
     } catch (error) {
       console.error('Error deleting vehicle:', error);
       res.status(500).json({ message: 'Error deleting vehicle' });
+    }
+  });
+
+  // Route to get the count of pending approvals
+  router.get('/pending-count', verifyToken, async (req, res) => {
+    try {
+      const count = await Vehicles.count({
+        where: { approvalStatus: false }
+      });
+      res.json({ count });
+    } catch (error) {
+      console.error('Error fetching pending approvals count:', error);
+      res.status(500).json({ message: 'Error fetching pending approvals count' });
     }
   });
 
