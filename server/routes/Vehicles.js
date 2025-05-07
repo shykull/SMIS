@@ -24,6 +24,30 @@ router.get('/setting', verifyToken, async (req, res) => {
   }
 });
 
+// Route to update settings
+router.put('/setting', verifyToken, async (req, res) => {
+  const { owner_car } = req.body;
+
+  try {
+    // Find the settings entry by ID (assuming there's only one settings entry with ID = 1)
+    const settings = await Settings.findOne({ where: { id: 1 } });
+
+    if (!settings) {
+      return res.status(404).json({ message: 'Settings not found' });
+    }
+
+    // Update the settings
+    settings.owner_car = owner_car;
+    await settings.save();
+
+    res.json({ message: 'Settings updated successfully', settings });
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ message: 'Error updating settings' });
+  }
+});
+
+
 // Route to get all visitors for the logged-in user
 router.get('/all', verifyToken, async (req, res) => {
   try {
@@ -38,13 +62,17 @@ router.get('/all', verifyToken, async (req, res) => {
             {
                 model: Permissions,
                 as: 'Permission',
-                attributes: ['owner', 'tenant']
+                
             },
             {
               model: Building,
               as: 'Buildings',
-              through: { attributes: [] }, // Exclude join table attributes
-              attributes: ['block', 'level', 'unit']
+              attributes: ['block', 'level', 'unit'],
+              order: [
+                ['block', 'ASC'], // Order by block in ascending order
+                ['level', 'ASC'], // Then order by level in ascending order
+                ['unit', 'ASC']   // Finally order by unit in ascending order
+              ]
             }
           ]
         }
@@ -144,25 +172,27 @@ router.put('/approve/:id', verifyToken, async (req, res) => {
 
 // Route to delete a vehicle
 router.delete('/:id', verifyToken, async (req, res) => {
-    const { id } = req.params;
-  
-    try {
-      // Find the vehicle by ID
-      const vehicle = await Vehicles.findByPk(id);
-  
-      if (!vehicle) {
-        return res.status(404).json({ message: 'Vehicle not found' });
-      }
-  
-      // Delete the vehicle
-      await vehicle.destroy();
-  
-      res.json({ message: 'Vehicle Registration deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting vehicle:', error);
-      res.status(500).json({ message: 'Error deleting vehicle' });
+  const { id } = req.params;
+
+  try {
+    // Find the vehicle by ID
+    const vehicle = await Vehicles.findByPk(id);
+
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
     }
-  });
+
+    const carPlateNumber = vehicle.carPlateNumber; // Store the carPlateNumber before deleting
+
+    // Delete the vehicle
+    await vehicle.destroy();
+
+    res.json({ message: `Vehicle with plate number "${carPlateNumber}" deleted successfully` });
+  } catch (error) {
+    console.error('Error deleting vehicle:', error);
+    res.status(500).json({ message: 'Error deleting vehicle' });
+  }
+});
 
   // Route to get the count of pending approvals
   router.get('/pending-count', verifyToken, async (req, res) => {
