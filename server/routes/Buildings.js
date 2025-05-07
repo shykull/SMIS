@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Building, UserBuildings, Users, Permissions } = require("../models");
+const { Building, UserBuildings, Users, Permissions, Settings } = require("../models");
 const cookieParser = require('cookie-parser');
 const { verifyToken } = require('../middleware/AuthMiddleware');
 const { Op } = require('sequelize');
@@ -9,6 +9,45 @@ const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
 
 router.use(cookieParser()); // Enable cookie parsing
+
+// Route to get global settings
+router.get('/settings', verifyToken, async (req, res) => {
+    try {
+      const settings = await Settings.findOne({ where: { id: 1 } });
+  
+      if (!settings) {
+        return res.status(404).json({ message: 'Settings not found' });
+      }
+  
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      res.status(500).json({ message: 'Error fetching settings' });
+    }
+});
+
+//Update Global Property Name
+router.put('/settings', verifyToken, async (req, res) => {
+    const { property_name } = req.body;
+
+    try {
+      // Find the settings entry by ID (assuming there's only one settings entry with ID = 1)
+      const settings = await Settings.findOne({ where: { id: 1 } });
+  
+      if (!settings) {
+        return res.status(404).json({ message: 'Settings not found' });
+      }
+  
+      // Update the settings
+      settings.property_name = property_name;
+      await settings.save();
+  
+      res.json({ message: 'Settings updated successfully', settings });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      res.status(500).json({ message: 'Error updating settings' });
+    }
+});
 
 // Create a new building
 router.post('/create', verifyToken, async (req, res) => {

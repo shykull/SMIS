@@ -25,6 +25,8 @@ function PropertyManagement() {
   const [selectedOwner, setSelectedOwner] = useState(''); // State to store the selected owner
   const [selectedTenant, setSelectedTenant] = useState(''); // State to store the selected tenant
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [showSettingsModal, setShowSettingsModal] = useState(false); // State to control settings modal visibility
+  const [propertyName, setPropertyName] = useState(''); // State to store the property name
 
   useEffect(() => {
     if (auth.loading) {
@@ -41,6 +43,7 @@ function PropertyManagement() {
           setUserProfile(response.data.user);
           handlePermission(response.data.user.Permission)
           .then(() => {
+            fetchPropertyName();
             fetchBuildings();
             fetchBuildingsAssoc();
             fetchUsers();
@@ -105,6 +108,27 @@ function PropertyManagement() {
      // console.log('Users:', response.data);
     } catch (error) {
       setAlertMessage('Error fetching users: ' + (error.response?.data?.message || error.message));
+      setAlertType('danger');
+    }
+  };
+  const fetchPropertyName = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/build/settings', { withCredentials: true });
+      setPropertyName(response.data.property_name); // Set the current property name
+    } catch (error) {
+      setAlertMessage('Error fetching property name: ' + (error.response?.data?.message || error.message));
+      setAlertType('danger');
+    }
+  };
+
+  const handleSettingsSubmit = async () => {
+    try {
+      await axios.put('http://localhost:3001/api/build/settings', { property_name: propertyName }, { withCredentials: true });
+      setAlertMessage('Property name updated successfully');
+      setAlertType('success');
+      setShowSettingsModal(false); // Close the modal
+    } catch (error) {
+      setAlertMessage('Error updating property name: ' + (error.response?.data?.message || error.message));
       setAlertType('danger');
     }
   };
@@ -207,6 +231,8 @@ function PropertyManagement() {
     }
   };
 
+
+
   const ownerOptions = users.filter(user => user.Permission.owner).map(user => ({
     value: user.id,
     label: `${user.firstname} ${user.lastname}`
@@ -219,7 +245,7 @@ function PropertyManagement() {
 
   return (
     <div className="container mt-4">
-      <h1>Property Management</h1>
+      <h1>{propertyName} - Property Management</h1>
       {/* Bootstrap dismissible alert */}
       {alertMessage && (
         <div className={`alert alert-${alertType} alert-dismissible fade show`} role="alert">
@@ -227,6 +253,8 @@ function PropertyManagement() {
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close" onClick={() => setAlertMessage('')}></button>
         </div>
       )}
+
+    <button className="btn btn-primary mt-3 mb-3" onClick={() => setShowSettingsModal(true)}>Edit Property Name</button>
 
       <h4 className="mt-4">Development Avaliable Units</h4>
       <table id="buildTable" className="table table-striped table-bordered">
@@ -290,6 +318,29 @@ function PropertyManagement() {
         <Modal.Footer>
           <Button variant="primary" onClick={handleUpdate}>Update</Button>
           <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Settings Modal */}
+      <Modal show={showSettingsModal} onHide={() => setShowSettingsModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Property Name</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label htmlFor="propertyName" className="form-label">Property Name</label>
+            <input
+              type="text"
+              className="form-control"
+              id="propertyName"
+              value={propertyName}
+              onChange={(e) => setPropertyName(e.target.value)}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowSettingsModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handleSettingsSubmit}>Save Changes</Button>
         </Modal.Footer>
       </Modal>
       
