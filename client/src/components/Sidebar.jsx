@@ -8,18 +8,18 @@ function Sidebar() {
   const [pendingVehicleApprovals, setVehiclePendingApprovals] = useState(0);
 
   useEffect(() => {
-    // Fetch the count of pending approvals
-    const fetchVehiclePendingApprovals = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/api/vehicle/pending-count', { withCredentials: true });
-        setVehiclePendingApprovals(response.data.count);
-      } catch (error) {
-        console.error('Error fetching pending approvals:', error);
-      }
-    };
-
     fetchVehiclePendingApprovals();
   }, []);
+
+   // Fetch the count of pending approvals
+   const fetchVehiclePendingApprovals = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/vehicle/pending-count', { withCredentials: true });
+      setVehiclePendingApprovals(response.data.count);
+    } catch (error) {
+      console.error('Error fetching pending approvals:', error);
+    }
+  };
 
   return (
     <>
