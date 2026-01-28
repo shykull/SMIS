@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../helpers/AuthContext';
 import ProfilePicture from '../components/ProfilePicture';
+import { Tooltip, Toast, Popover } from 'bootstrap'; 
 import axios from "axios";
 
 function Profile() {
@@ -37,6 +38,14 @@ function Profile() {
         }
     }, [auth.status, auth.loading, navigate]);
 
+    // Initialize tooltips after the component is rendered
+    useEffect(() => {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach((tooltipTriggerEl) => {
+            new Tooltip(tooltipTriggerEl); // Initialize each tooltip
+        });
+    }, []);
+
     const fetchProfile = async () => {
         try {
             const response = await axios.get('http://localhost:3001/api/user/status', { 
@@ -57,13 +66,22 @@ function Profile() {
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            const formData = userProfile;
-                      
+            // Create a new FormData instance
+            const formData = new FormData();
+    
+            // Append all fields from userProfile to the FormData object
+            Object.keys(userProfile).forEach((key) => {
+                if (userProfile[key] !== null && userProfile[key] !== undefined) {
+                    formData.append(key, userProfile[key]);
+                }
+            });
+    
+            // Append the password if it is provided
             if (password) {
                 formData.append('password', password);
             }
-
-
+    
+            // Send the FormData object to the server
             const response = await axios.put(
                 'http://localhost:3001/api/user/profile',
                 formData,
@@ -74,22 +92,23 @@ function Profile() {
                     },
                 }
             );
-
-            setUserProfile(prev => ({
+    
+            // Update the user profile with the response data
+            setUserProfile((prev) => ({
                 ...prev,
                 ...response.data.user,
-                Buildings: response.data.user.Buildings || []
+                Buildings: response.data.user.Buildings || [],
             }));
-            
+    
             setAlertMessage('Profile updated successfully!');
             setAlertType('success');
             setPassword('');
-            
-            fetchProfile(); // Refresh profile data
-            
-            // Refresh auth status if needed
+    
+            // Refresh profile data
+            fetchProfile();
+    
+            // Clear the alert message after 3 seconds
             setTimeout(() => setAlertMessage(''), 3000);
-
         } catch (error) {
             handleError(error);
         }
@@ -177,7 +196,7 @@ function Profile() {
                 )}
             </h3>
 
-            <div className="text-center mb-4">
+            <div className="text-center mb-4" data-bs-toggle="tooltip" data-bs-placement="left" title="Click to change profile picture">
                 <ProfilePicture
                     userProfile={userProfile}
                     handleFileChange={handleFileChange}

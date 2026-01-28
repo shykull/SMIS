@@ -50,7 +50,7 @@ function Home() {
 
   return (
     <div className="container mt-3">
-      <div className="row justify-content-md-center mb-4">
+      <div style={{ pointerEvents: 'none' }} className="row justify-content-md-center mb-4">
         <ProfilePicture
             userProfile={userProfile}  // Passing the entire userProfile object
         />

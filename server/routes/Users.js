@@ -7,6 +7,7 @@ const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const { verifyToken } = require('../middleware/AuthMiddleware');
 const { Op } = require('sequelize');
+const fs = require('fs'); // Import the file system module
 
 const JWT_SECRET = process.env.JWT_SECRET; // Use a secure secret in production
 const JWT_EXPIRY = process.env.JWT_EXPIRATION_TIME; // Set token expiry time
@@ -141,57 +142,74 @@ router.get('/status', verifyToken, async (req, res) => {
 // Route to update user profile
 router.put('/profile', verifyToken, upload.single('profilePicture'), async (req, res) => {
     const { id, email, firstname, lastname, contact, address, password, ownerComments, carPlateNumber, Permission } = req.body;
-    const profilePicture = req.file ? `/profile/${req.file.filename}` : undefined; // Use undefined instead of null
-
-    // Construct update data conditionally
-    const updateData = { email, firstname, lastname, contact, address };
-
-    // Add profilePicture to updateData only if a new file was uploaded
-    if (profilePicture !== undefined) {
-        updateData.profilePicture = profilePicture;
-    }
-
-    // Hash the new password if provided
-    if (password) {
-        const hash = await bcrypt.hash(password, 10);
-        updateData.password = hash;
-    }
-
-    if (carPlateNumber) {
-
-        // Check if the vehicle already exists
-        const existingVehicle = await Vehicles.findOne({
-            where: {
-                [Op.and]: [
-                    { ownerId: id },
-                    { carPlateNumber: carPlateNumber }
-                ]
-            }
-        });
-        
-        if (!existingVehicle) {
-            await Vehicles.create({
-                ownerId: id,
-                carPlateNumber: carPlateNumber,
-                ownerComments: ownerComments
-            });
-        }
-    }
+    const profilePicture = req.file ? `/profile/${req.file.filename}` : undefined; // Use undefined if no file is uploaded
 
     try {
-        // Update user profile in the database
-        const updated = await Users.update(updateData, { where: { id } });
+        // Fetch the current user to get the existing profile picture
+        const user = await Users.findOne({ where: { id } });
 
-        if (updated === 0) {
+        if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const user = await Users.findOne({
-            where: { id: id },
+        // Construct update data conditionally
+        const updateData = { email, firstname, lastname, contact, address };
+
+        // If a new profile picture is uploaded, delete the old one
+        if (profilePicture !== undefined) {
+            if (user.profilePicture) {
+                const oldProfilePicturePath = `../client/public${user.profilePicture}`;
+                fs.unlink(oldProfilePicturePath, (err) => {
+                    if (err) {
+                        console.error('Error deleting old profile picture:', err);
+                    } else {
+                        console.log('Old profile picture deleted:', oldProfilePicturePath);
+                    }
+                });
+            }
+            updateData.profilePicture = profilePicture;
+        }
+
+        // Hash the new password if provided
+        if (password) {
+            const hash = await bcrypt.hash(password, 10);
+            updateData.password = hash;
+        }
+
+        // Handle vehicle registration if carPlateNumber is provided
+        if (carPlateNumber) {
+            const existingVehicle = await Vehicles.findOne({
+                where: {
+                    [Op.and]: [
+                        { ownerId: id },
+                        { carPlateNumber: carPlateNumber }
+                    ]
+                }
+            });
+
+            if (!existingVehicle) {
+                await Vehicles.create({
+                    ownerId: id,
+                    carPlateNumber: carPlateNumber,
+                    ownerComments: ownerComments
+                });
+            }
+        }
+
+        // Update user profile in the database
+        const updated = await Users.update(updateData, { where: { id } });
+
+        if (updated[0] === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Fetch the updated user profile
+        const updatedUser = await Users.findOne({
+            where: { id },
             attributes: { exclude: ['password'] } // Exclude sensitive fields
         });
 
-        res.json({ user });
+        res.json({ user: updatedUser });
 
     } catch (error) {
         console.error('Error updating profile:', error);
