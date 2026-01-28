@@ -29,16 +29,6 @@ module.exports = (sequelize, DataTypes) => {
             as: 'Users',
             onDelete: "cascade",
         });
-        Building.hasMany(models.UnitTransactions, {
-            foreignKey: 'BuildingId',
-            as: 'Transactions',
-            onDelete: "cascade",
-        });
-        Building.hasMany(models.waterReadings, {
-            foreignKey: 'BuildingId',
-            as: 'waterReadings',
-            onDelete: "cascade",
-        });
     };
 
     return Building;
