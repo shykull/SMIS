@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh, faCar  } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh, faCar, faCalculator } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
 function Sidebar() {
@@ -75,6 +75,9 @@ function Sidebar() {
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard/task-management"><FontAwesomeIcon icon={faListCheck} size="xl" style={{ marginRight: '5px' }} />Task Management</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/dashboard/accounting-settings"><FontAwesomeIcon icon={faCalculator} size="xl" style={{ marginRight: '5px' }} />Accounting Settings</Link>
             </li>
           </ul>
         </div>

@@ -10,6 +10,7 @@ import VisitorManagement from './VisitorManagement';
 import AdminOverview from './AdminOverview';
 import AnnoucementManagement from './AnnoucementManagement';
 import VehicleManagement from './VehicleManagement';
+import AccountingSettings from './AccountingSettings';
 
 function Dashboard() {
   const { auth } = useContext(AuthContext); // Access auth context
@@ -71,6 +72,7 @@ function Dashboard() {
           <Route path="property-management" element={<PropertyManagement />} />
           <Route path="visitor-management" element={<VisitorManagement />} />
           <Route path="task-management" element={<TaskManagement />} />
+          <Route path="accounting-settings" element={<AccountingSettings />} />
         </Routes>
       </div>
     </div>

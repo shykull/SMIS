@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Row,Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh, faCar } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faBars, faBuildingLock, faListCheck, faUsersGear, faVolumeHigh, faCar, faCalculator } from '@fortawesome/free-solid-svg-icons';
 
 function AdminOverview() {
    const [pendingVehicleApprovals, setVehiclePendingApprovals] = useState(0);
@@ -37,6 +37,7 @@ function AdminOverview() {
           <Link className="btn btn-primary col-5 me-2 mt-1" to="/dashboard/property-management"><FontAwesomeIcon icon={faBuildingLock} size="xl" style={{ marginRight: '5px' }} />Property Management</Link>
           <Link className="btn btn-primary col-5 me-2 mt-1" to="/dashboard/visitor-management"><FontAwesomeIcon icon={faAddressBook} size="xl" style={{ marginRight: '5px' }} />Visitor Management</Link>
           <Link className="btn btn-primary col-5 me-2 mt-1" to="/dashboard/task-management"><FontAwesomeIcon icon={faListCheck} size="xl" style={{ marginRight: '5px' }} />Task Management</Link>
+          <Link className="btn btn-primary col-5 me-2 mt-1" to="/dashboard/accounting-settings"><FontAwesomeIcon icon={faCalculator} size="xl" style={{ marginRight: '5px' }} />Accounting Settings</Link>
         </Col>
       </Row>
     </div>
