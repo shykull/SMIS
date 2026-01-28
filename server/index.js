@@ -25,6 +25,17 @@ app.use("/api/visitor", visitorRouter);
 const vehicleRouter = require('./routes/Vehicles');
 app.use("/api/vehicle", vehicleRouter);
 
+// Accounting module routes
+const accountingSettingsRouter = require('./routes/AccountingSettings');
+app.use("/api/accounting/settings", accountingSettingsRouter);
+const buildingAccountRouter = require('./routes/BuildingAccount');
+app.use("/api/accounting/building-account", buildingAccountRouter);
+const transactionTypeRouter = require('./routes/TransactionType');
+app.use("/api/accounting/transaction-type", transactionTypeRouter);
+const transactionRouter = require('./routes/Transaction');
+app.use("/api/accounting/transaction", transactionRouter);
+const paymentRouter = require('./routes/Payment');
+app.use("/api/accounting/payment", paymentRouter);
 
 db.sequelize.sync()
   .then(() => {
